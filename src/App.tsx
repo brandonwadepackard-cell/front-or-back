@@ -7,6 +7,7 @@ import { Navigation } from "@/components/Navigation";
 import Index from "./pages/Index";
 import ContentGenerator from "./pages/ContentGenerator";
 import ContentHistory from "./pages/ContentHistory";
+import Templates from "./pages/Templates";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/content" element={<ContentGenerator />} />
           <Route path="/history" element={<ContentHistory />} />
+          <Route path="/templates" element={<Templates />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

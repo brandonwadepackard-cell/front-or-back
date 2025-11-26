@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,13 +7,23 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Sparkles, Copy, Check } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 
 export default function ContentGenerator() {
-  const [topic, setTopic] = useState("");
-  const [platform, setPlatform] = useState<string>("all");
+  const [searchParams] = useSearchParams();
+  const [topic, setTopic] = useState(searchParams.get("topic") || "");
+  const [platform, setPlatform] = useState<string>(searchParams.get("platform") || "all");
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Update form when URL params change (from templates)
+  useEffect(() => {
+    const topicParam = searchParams.get("topic");
+    const platformParam = searchParams.get("platform");
+    if (topicParam) setTopic(topicParam);
+    if (platformParam) setPlatform(platformParam);
+  }, [searchParams]);
 
   // Fetch recent content
   const { data: recentContent, refetch } = useQuery({

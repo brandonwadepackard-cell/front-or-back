@@ -41,6 +41,33 @@ export type Database = {
         }
         Relationships: []
       }
+      templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          platform: string
+          topic: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          platform: string
+          topic: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          platform?: string
+          topic?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

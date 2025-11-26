@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Search, Copy, Check } from "lucide-react";
+import { Search, Copy, Check, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const ContentHistory = () => {
@@ -54,6 +54,69 @@ const ContentHistory = () => {
     return emojis[platform.toLowerCase()] || "📱";
   };
 
+  const exportToJSON = () => {
+    if (!filteredContent || filteredContent.length === 0) {
+      toast({
+        title: "No data to export",
+        description: "There is no content to export",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const dataStr = JSON.stringify(filteredContent, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `content-history-${new Date().toISOString().split("T")[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Exported!",
+      description: "Content exported as JSON",
+    });
+  };
+
+  const exportToCSV = () => {
+    if (!filteredContent || filteredContent.length === 0) {
+      toast({
+        title: "No data to export",
+        description: "There is no content to export",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const headers = ["Date", "Platform", "Topic", "Content", "Status"];
+    const rows = filteredContent.map((item) => [
+      new Date(item.created_at).toLocaleString(),
+      item.platform,
+      item.topic,
+      `"${item.content.replace(/"/g, '""')}"`,
+      item.status,
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
+
+    const dataBlob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `content-history-${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Exported!",
+      description: "Content exported as CSV",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto px-6 py-12">
@@ -68,8 +131,22 @@ const ContentHistory = () => {
           {/* Filters */}
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle>Filters</CardTitle>
-              <CardDescription>Search and filter your content</CardDescription>
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle>Filters</CardTitle>
+                  <CardDescription>Search and filter your content</CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={exportToCSV}>
+                    <Download className="h-4 w-4 mr-2" />
+                    CSV
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={exportToJSON}>
+                    <Download className="h-4 w-4 mr-2" />
+                    JSON
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col md:flex-row gap-4">

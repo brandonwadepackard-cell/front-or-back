@@ -5,6 +5,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "react-router-dom";
@@ -26,13 +28,16 @@ export const Navigation = () => {
                 Menu
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 bg-background z-50">
+            <DropdownMenuContent align="end" className="w-52 bg-background z-50">
               <DropdownMenuItem asChild>
                 <NavLink to="/" end className="w-full cursor-pointer flex items-center gap-2">
                   <Home className="h-4 w-4" />
                   Home
                 </NavLink>
               </DropdownMenuItem>
+              
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Content Creation</DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <NavLink to="/content" className="w-full cursor-pointer flex items-center gap-2">
                   <FileText className="h-4 w-4" />
@@ -45,6 +50,9 @@ export const Navigation = () => {
                   Templates
                 </NavLink>
               </DropdownMenuItem>
+              
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Management</DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <NavLink to="/history" className="w-full cursor-pointer flex items-center gap-2">
                   <Clock className="h-4 w-4" />
@@ -57,6 +65,9 @@ export const Navigation = () => {
                   Analytics
                 </NavLink>
               </DropdownMenuItem>
+              
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Scheduling</DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <NavLink to="/calendar" className="w-full cursor-pointer flex items-center gap-2">
                   <Calendar className="h-4 w-4" />

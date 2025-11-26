@@ -16,6 +16,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { ContentOptimizer } from "@/components/ContentOptimizer";
 
 export default function ContentGenerator() {
   const [searchParams] = useSearchParams();
@@ -527,6 +528,17 @@ export default function ContentGenerator() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Content Optimizer */}
+        {topic && (
+          <ContentOptimizer
+            content={topic}
+            platform={platform}
+            onHashtagsSelect={(hashtags) => {
+              setTopic(prev => `${prev}\n\n${hashtags.map(h => `#${h}`).join(' ')}`);
+            }}
+          />
+        )}
 
         {/* Recent Content */}
         <div className="space-y-4">

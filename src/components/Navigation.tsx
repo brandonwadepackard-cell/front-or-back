@@ -27,6 +27,13 @@ export const Navigation = () => {
             >
               Content Generator
             </NavLink>
+            <NavLink
+              to="/history"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              activeClassName="text-foreground font-medium"
+            >
+              History
+            </NavLink>
           </div>
         </div>
       </div>

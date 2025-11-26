@@ -41,6 +41,14 @@ export const useKeyboardShortcuts = () => {
             e.preventDefault();
             navigate("/bulk-schedule");
             break;
+          case "i":
+            e.preventDefault();
+            navigate("/library");
+            break;
+          case "w":
+            e.preventDefault();
+            navigate("/scraper");
+            break;
         }
       }
     };

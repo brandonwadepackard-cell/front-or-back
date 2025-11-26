@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { TemplateCardSkeleton } from "@/components/skeletons/CardSkeleton";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -152,10 +153,15 @@ const Templates = () => {
     return matchesCategory && matchesPlatform && matchesSearch;
   });
 
+  const handleRefresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["templates"] });
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       <AnimatedBackground variant="mesh" />
-      <div className="container mx-auto px-6 py-12 relative z-10">
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="container mx-auto px-6 py-12 relative z-10">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
           <div className="space-y-3 animate-fade-in">
@@ -502,6 +508,7 @@ const Templates = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+      </PullToRefresh>
     </div>
   );
 };

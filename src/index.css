@@ -8,7 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 210 20% 98%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -17,26 +17,45 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 220 14% 96%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 215.4 16.3% 56.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 262 70% 95%;
+    --accent-foreground: 262 83% 58%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 262 83% 58%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+    
+    /* Gradient tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(288 83% 65%));
+    --gradient-secondary: linear-gradient(135deg, hsl(220 14% 96%), hsl(210 20% 98%));
+    --gradient-accent: linear-gradient(135deg, hsl(262 70% 95%), hsl(288 70% 97%));
+    
+    /* Template category colors */
+    --template-marketing: 14 100% 57%;
+    --template-marketing-bg: 14 100% 97%;
+    --template-educational: 217 91% 60%;
+    --template-educational-bg: 217 91% 97%;
+    --template-engagement: 142 76% 36%;
+    --template-engagement-bg: 142 76% 97%;
+    --template-inspirational: 326 78% 58%;
+    --template-inspirational-bg: 326 78% 97%;
+    --template-updates: 45 93% 47%;
+    --template-updates-bg: 45 93% 97%;
+    --template-seasonal: 280 67% 60%;
+    --template-seasonal-bg: 280 67% 97%;
 
     --sidebar-background: 0 0% 98%;
 
@@ -66,33 +85,52 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 224 71% 4%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 224 71% 6%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 224 71% 6%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 215 28% 17%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
+    --muted: 215 28% 17%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 215 28% 17%;
+    --accent-foreground: 262 83% 58%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+    --ring: 262 83% 58%;
+    
+    /* Gradient tokens - dark */
+    --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(288 83% 65%));
+    --gradient-secondary: linear-gradient(135deg, hsl(215 28% 17%), hsl(224 71% 6%));
+    --gradient-accent: linear-gradient(135deg, hsl(262 50% 15%), hsl(288 50% 17%));
+    
+    /* Template category colors - dark */
+    --template-marketing: 14 100% 57%;
+    --template-marketing-bg: 14 100% 12%;
+    --template-educational: 217 91% 60%;
+    --template-educational-bg: 217 91% 12%;
+    --template-engagement: 142 76% 40%;
+    --template-engagement-bg: 142 76% 12%;
+    --template-inspirational: 326 78% 58%;
+    --template-inspirational-bg: 326 78% 12%;
+    --template-updates: 45 93% 55%;
+    --template-updates-bg: 45 93% 12%;
+    --template-seasonal: 280 67% 60%;
+    --template-seasonal-bg: 280 67% 12%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -120,6 +158,10 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
   }
 }

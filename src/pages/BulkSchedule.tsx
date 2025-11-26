@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ScrollReveal } from "@/components/ScrollReveal";
 
 interface ParsedContent {
   topic: string;
@@ -298,15 +299,18 @@ const BulkSchedule = () => {
       <div className="container mx-auto px-6 py-12">
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Header */}
-          <div className="space-y-3">
-            <h1 className="text-4xl font-bold">Bulk Schedule</h1>
-            <p className="text-muted-foreground">
-              Upload a CSV file or paste content to schedule multiple posts at once
-            </p>
-          </div>
+          <ScrollReveal variant="fade-up">
+            <div className="space-y-3">
+              <h1 className="text-4xl font-bold">Bulk Schedule</h1>
+              <p className="text-muted-foreground">
+                Upload a CSV file or paste content to schedule multiple posts at once
+              </p>
+            </div>
+          </ScrollReveal>
 
           {/* Instructions */}
-          <Alert>
+          <ScrollReveal variant="fade-up" delay={0.1}>
+            <Alert>
             <FileText className="h-4 w-4" />
             <AlertDescription>
               <strong>Format:</strong> topic, platform (twitter/linkedin/instagram), content, scheduled_at (YYYY-MM-DD HH:MM)
@@ -315,9 +319,11 @@ const BulkSchedule = () => {
               </Button>
             </AlertDescription>
           </Alert>
+          </ScrollReveal>
 
           {/* Import Tabs */}
-          <Tabs defaultValue="upload" className="w-full">
+          <ScrollReveal variant="scale" delay={0.2}>
+            <Tabs defaultValue="upload" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="upload">
                 <Upload className="h-4 w-4 mr-2" />
@@ -390,10 +396,12 @@ Marketing tips, linkedin, 5 ways to automate your marketing, 2025-01-16 14:30"
               </Card>
             </TabsContent>
           </Tabs>
+          </ScrollReveal>
 
           {/* Preview Table */}
           {parsedData.length > 0 && (
-            <Card>
+            <ScrollReveal variant="fade-up" delay={0.3}>
+              <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -470,6 +478,7 @@ Marketing tips, linkedin, 5 ways to automate your marketing, 2025-01-16 14:30"
                 </div>
               </CardContent>
             </Card>
+            </ScrollReveal>
           )}
         </div>
       </div>

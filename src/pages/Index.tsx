@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Brain, ArrowRight, Zap, Target, TrendingUp } from "lucide-react";
+import { Sparkles, ArrowRight, Zap, Target, TrendingUp } from "lucide-react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { ParallaxHero } from "@/components/ParallaxHero";
 
@@ -70,26 +70,6 @@ const Index = () => {
                     <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="group hover:-translate-y-2 transition-all duration-300 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm border border-border/50 animate-slide-up" style={{ animationDelay: "100ms" }}>
-              <CardHeader className="pb-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
-                  <Brain className="w-7 h-7 text-white" />
-                </div>
-                <CardTitle className="text-2xl">Council System</CardTitle>
-                <CardDescription className="text-base">
-                  Multi-agent decision making system with AI collaboration
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge variant="secondary" className="bg-muted">Coming Soon</Badge>
-                </div>
-                <Button className="w-full" disabled variant="secondary">
-                  Coming Soon
-                </Button>
               </CardContent>
             </Card>
           </div>

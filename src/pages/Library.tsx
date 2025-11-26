@@ -160,6 +160,24 @@ const Library = () => {
         });
       }
 
+      // Generate thumbnail for videos
+      if (item.type === 'video') {
+        supabase.functions.invoke('generate-video-thumbnail', {
+          body: {
+            itemId: libraryItem.id,
+            title: item.title,
+            description: item.description
+          }
+        }).then(({ data, error }) => {
+          if (error) {
+            console.error('Thumbnail generation error:', error);
+          } else {
+            toast.success('Thumbnail generated!');
+            queryClient.invalidateQueries({ queryKey: ['library-items'] });
+          }
+        });
+      }
+
       // Add tags
       if (item.tags.length > 0) {
         const tagInserts = item.tags.map(tagId => ({
@@ -555,12 +573,34 @@ const Library = () => {
                     className="w-full h-40 object-cover rounded"
                   />
                 )}
-                {item.storage_path && item.type === 'video' && (
-                  <video 
-                    src={item.storage_path}
-                    controls
-                    className="w-full h-40 rounded"
-                  />
+                {item.type === 'video' && (
+                  <div className="relative">
+                    {item.thumbnail_path ? (
+                      <div className="relative group">
+                        <img 
+                          src={item.thumbnail_path}
+                          alt={`${item.title} thumbnail`}
+                          className="w-full h-40 object-cover rounded"
+                        />
+                        {item.storage_path && (
+                          <a 
+                            href={item.storage_path} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded"
+                          >
+                            <Video className="h-12 w-12 text-white" />
+                          </a>
+                        )}
+                      </div>
+                    ) : item.storage_path ? (
+                      <video 
+                        src={item.storage_path}
+                        controls
+                        className="w-full h-40 rounded"
+                      />
+                    ) : null}
+                  </div>
                 )}
                 {item.storage_path && item.type === 'voice_memo' && (
                   <div className="space-y-2">

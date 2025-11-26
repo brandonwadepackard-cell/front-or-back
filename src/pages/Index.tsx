@@ -47,7 +47,7 @@ const Index = () => {
           </div>
 
           {/* Features Grid */}
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <Card className="group hover:-translate-y-2 transition-all duration-300 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm border border-border/50 animate-slide-up">
               <CardHeader className="pb-4">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">

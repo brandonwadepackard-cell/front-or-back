@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Globe, Plus, Loader2, CheckCircle, XCircle, Clock, Play, TrendingUp, Repeat, Zap } from "lucide-react";
+import { Globe, Plus, Loader2, CheckCircle, XCircle, Clock, Play, TrendingUp, Repeat, Zap, Pause, PlayCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 
@@ -27,6 +27,7 @@ interface ScrapeJob {
   recurrence_enabled?: boolean;
   recurrence_interval?: string;
   recurrence_time?: string;
+  recurrence_paused?: boolean;
   next_run_at?: string;
   created_at: string;
   updated_at: string;
@@ -186,6 +187,25 @@ const Scraper = () => {
     onError: (error) => {
       console.error('Error triggering recurring processor:', error);
       toast.error('Failed to trigger recurring processor');
+    }
+  });
+
+  // Toggle pause/resume for recurring jobs
+  const togglePauseMutation = useMutation({
+    mutationFn: async ({ id, currentPaused }: { id: string; currentPaused: boolean }) => {
+      const { error } = await supabase
+        .from('scrape_jobs')
+        .update({ recurrence_paused: !currentPaused })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['scrape-jobs'] });
+      toast.success(variables.currentPaused ? 'Recurring job resumed' : 'Recurring job paused');
+    },
+    onError: (error) => {
+      console.error('Error toggling pause:', error);
+      toast.error('Failed to update job');
     }
   });
 
@@ -496,12 +516,14 @@ const Scraper = () => {
                 return (
                   <Card
                     key={job.id}
-                    className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => navigate(`/scraper/${job.id}`)}
+                    className="hover:shadow-md transition-shadow"
                   >
                     <CardContent className="pt-6">
                       <div className="flex items-start justify-between">
-                        <div className="space-y-2 flex-1">
+                        <div 
+                          className="space-y-2 flex-1 cursor-pointer"
+                          onClick={() => navigate(`/scraper/${job.id}`)}
+                        >
                           <div className="flex items-center gap-3">
                             <StatusIcon status={job.status} />
                             <h3 className="font-semibold text-lg">
@@ -510,6 +532,12 @@ const Scraper = () => {
                             <Badge variant="outline" className={config.color}>
                               {config.label}
                             </Badge>
+                            {job.recurrence_paused && (
+                              <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                                <Pause className="h-3 w-3 mr-1" />
+                                Paused
+                              </Badge>
+                            )}
                           </div>
                           <p className="text-sm text-muted-foreground">
                             {job.query}
@@ -530,7 +558,7 @@ const Scraper = () => {
                               <Badge variant="secondary" className="text-xs bg-purple-500/10 text-purple-500 border-purple-500/20">
                                 <Repeat className="h-3 w-3 mr-1" />
                                 {job.recurrence_interval}
-                                {job.next_run_at && (
+                                {job.next_run_at && !job.recurrence_paused && (
                                   <span className="ml-1">
                                     (Next: {new Date(job.next_run_at).toLocaleString()})
                                   </span>
@@ -542,6 +570,29 @@ const Scraper = () => {
                             Created {new Date(job.created_at).toLocaleString()}
                           </p>
                         </div>
+                        {job.recurrence_enabled && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              togglePauseMutation.mutate({ 
+                                id: job.id, 
+                                currentPaused: job.recurrence_paused || false 
+                              });
+                            }}
+                            disabled={togglePauseMutation.isPending}
+                            className="ml-4"
+                          >
+                            {togglePauseMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : job.recurrence_paused ? (
+                              <PlayCircle className="h-4 w-4" />
+                            ) : (
+                              <Pause className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

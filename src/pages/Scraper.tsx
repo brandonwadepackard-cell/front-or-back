@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Globe, Plus, Loader2, CheckCircle, XCircle, Clock, Play, TrendingUp, Repeat } from "lucide-react";
+import { Globe, Plus, Loader2, CheckCircle, XCircle, Clock, Play, TrendingUp, Repeat, Zap } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 
@@ -167,6 +167,28 @@ const Scraper = () => {
     }
   });
 
+  // Manual trigger for recurring scrapes processor
+  const triggerRecurringProcessorMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('process-recurring-scrapes');
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['scrape-jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['scraper-stats'] });
+      if (data.processed === 0) {
+        toast.info('No recurring jobs ready to run');
+      } else {
+        toast.success(`Processed ${data.processed} recurring job${data.processed > 1 ? 's' : ''}`);
+      }
+    },
+    onError: (error) => {
+      console.error('Error triggering recurring processor:', error);
+      toast.error('Failed to trigger recurring processor');
+    }
+  });
+
   // Fetch stats
   const { data: stats } = useQuery({
     queryKey: ['scraper-stats'],
@@ -205,13 +227,33 @@ const Scraper = () => {
             Scrape websites, extract data, and track prices automatically
           </p>
         </div>
-        <Dialog open={isNewJobOpen} onOpenChange={setIsNewJobOpen}>
-          <DialogTrigger asChild>
-            <Button size="lg" className="gap-2">
-              <Plus className="h-5 w-5" />
-              New Scrape
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="gap-2"
+            onClick={() => triggerRecurringProcessorMutation.mutate()}
+            disabled={triggerRecurringProcessorMutation.isPending}
+          >
+            {triggerRecurringProcessorMutation.isPending ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <Zap className="h-5 w-5" />
+                Test Recurring
+              </>
+            )}
+          </Button>
+          <Dialog open={isNewJobOpen} onOpenChange={setIsNewJobOpen}>
+            <DialogTrigger asChild>
+              <Button size="lg" className="gap-2">
+                <Plus className="h-5 w-5" />
+                New Scrape
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Create New Scrape Job</DialogTitle>
@@ -370,8 +412,9 @@ const Scraper = () => {
                 )}
               </Button>
             </div>
-          </DialogContent>
-        </Dialog>
+           </DialogContent>
+         </Dialog>
+        </div>
       </div>
 
       {/* Stats Cards */}

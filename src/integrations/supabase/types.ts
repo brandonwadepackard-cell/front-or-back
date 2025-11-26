@@ -19,7 +19,12 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          is_recurring: boolean | null
+          parent_content_id: string | null
           platform: string
+          recurrence_end_date: string | null
+          recurrence_interval: number | null
+          recurrence_type: string | null
           scheduled_at: string | null
           status: string
           topic: string
@@ -28,7 +33,12 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          is_recurring?: boolean | null
+          parent_content_id?: string | null
           platform: string
+          recurrence_end_date?: string | null
+          recurrence_interval?: number | null
+          recurrence_type?: string | null
           scheduled_at?: string | null
           status?: string
           topic: string
@@ -37,12 +47,25 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          is_recurring?: boolean | null
+          parent_content_id?: string | null
           platform?: string
+          recurrence_end_date?: string | null
+          recurrence_interval?: number | null
+          recurrence_type?: string | null
           scheduled_at?: string | null
           status?: string
           topic?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "content_parent_content_id_fkey"
+            columns: ["parent_content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       templates: {
         Row: {

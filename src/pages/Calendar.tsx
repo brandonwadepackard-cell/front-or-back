@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft, ChevronRight, Clock, Copy, Check, CalendarIcon, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Copy, Check, CalendarIcon, Trash2, Repeat } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +31,11 @@ interface ContentItem {
   content: string;
   scheduled_at: string | null;
   status: string;
+  is_recurring: boolean;
+  recurrence_type: 'daily' | 'weekly' | 'monthly' | null;
+  recurrence_interval: number;
+  recurrence_end_date: string | null;
+  parent_content_id: string | null;
 }
 
 const Calendar = () => {
@@ -41,6 +48,10 @@ const Calendar = () => {
   const [editedDate, setEditedDate] = useState<Date>();
   const [editedTime, setEditedTime] = useState("12:00");
   const [copied, setCopied] = useState(false);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceType, setRecurrenceType] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+  const [recurrenceInterval, setRecurrenceInterval] = useState(1);
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date>();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -183,6 +194,10 @@ const Calendar = () => {
     setSelectedItem(item);
     setEditedContent(item.content);
     setEditedStatus(item.status);
+    setIsRecurring(item.is_recurring || false);
+    setRecurrenceType(item.recurrence_type || 'weekly');
+    setRecurrenceInterval(item.recurrence_interval || 1);
+    setRecurrenceEndDate(item.recurrence_end_date ? new Date(item.recurrence_end_date) : undefined);
     if (item.scheduled_at) {
       const scheduledDate = new Date(item.scheduled_at);
       setEditedDate(scheduledDate);
@@ -209,6 +224,10 @@ const Calendar = () => {
         content: editedContent,
         status: editedStatus,
         scheduled_at: scheduledAt,
+        is_recurring: isRecurring,
+        recurrence_type: isRecurring ? recurrenceType : null,
+        recurrence_interval: isRecurring ? recurrenceInterval : 1,
+        recurrence_end_date: isRecurring && recurrenceEndDate ? recurrenceEndDate.toISOString() : null,
       },
     });
   };
@@ -366,6 +385,9 @@ const Calendar = () => {
                                 <span className="font-medium truncate flex-1">
                                   {item.topic}
                                 </span>
+                                {item.is_recurring && (
+                                  <Repeat className="h-3 w-3 text-muted-foreground" />
+                                )}
                               </div>
                               {item.scheduled_at && (
                                 <div className="flex items-center gap-1 text-muted-foreground">
@@ -446,41 +468,133 @@ const Calendar = () => {
                   </div>
 
                   {editedStatus === 'scheduled' && (
-                    <div className="space-y-2">
-                      <Label>Schedule Date & Time</Label>
-                      <div className="flex gap-2">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "justify-start text-left font-normal flex-1",
-                                !editedDate && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {editedDate ? format(editedDate, "PPP") : "Pick a date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <CalendarPicker
-                              mode="single"
-                              selected={editedDate}
-                              onSelect={setEditedDate}
-                              disabled={(date) => date < new Date()}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        
-                        <input
-                          type="time"
-                          value={editedTime}
-                          onChange={(e) => setEditedTime(e.target.value)}
-                          className="px-3 py-2 border rounded-md bg-background"
-                        />
+                    <>
+                      <div className="space-y-2">
+                        <Label>Schedule Date & Time</Label>
+                        <div className="flex gap-2">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "justify-start text-left font-normal flex-1",
+                                  !editedDate && "text-muted-foreground"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {editedDate ? format(editedDate, "PPP") : "Pick a date"}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <CalendarPicker
+                                mode="single"
+                                selected={editedDate}
+                                onSelect={setEditedDate}
+                                disabled={(date) => date < new Date()}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          
+                          <input
+                            type="time"
+                            value={editedTime}
+                            onChange={(e) => setEditedTime(e.target.value)}
+                            className="px-3 py-2 border rounded-md bg-background"
+                          />
+                        </div>
                       </div>
-                    </div>
+
+                      <div className="space-y-4 border-t pt-4">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-0.5">
+                            <Label className="flex items-center gap-2">
+                              <Repeat className="h-4 w-4" />
+                              Recurring Schedule
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                              Automatically create content at regular intervals
+                            </p>
+                          </div>
+                          <Switch
+                            checked={isRecurring}
+                            onCheckedChange={setIsRecurring}
+                          />
+                        </div>
+
+                        {isRecurring && (
+                          <div className="space-y-4 pl-6 border-l-2 border-muted">
+                            <div className="space-y-2">
+                              <Label>Repeat Every</Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  value={recurrenceInterval}
+                                  onChange={(e) => setRecurrenceInterval(parseInt(e.target.value) || 1)}
+                                  className="w-20"
+                                />
+                                <Select value={recurrenceType} onValueChange={(value: 'daily' | 'weekly' | 'monthly') => setRecurrenceType(value)}>
+                                  <SelectTrigger className="flex-1">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="daily">Day(s)</SelectItem>
+                                    <SelectItem value="weekly">Week(s)</SelectItem>
+                                    <SelectItem value="monthly">Month(s)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label>End Date (Optional)</Label>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    className={cn(
+                                      "justify-start text-left font-normal w-full",
+                                      !recurrenceEndDate && "text-muted-foreground"
+                                    )}
+                                  >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {recurrenceEndDate ? format(recurrenceEndDate, "PPP") : "Never ends"}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                  <CalendarPicker
+                                    mode="single"
+                                    selected={recurrenceEndDate}
+                                    onSelect={setRecurrenceEndDate}
+                                    disabled={(date) => date < new Date()}
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              {recurrenceEndDate && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setRecurrenceEndDate(undefined)}
+                                  className="w-full"
+                                >
+                                  Clear end date
+                                </Button>
+                              )}
+                            </div>
+
+                            <div className="bg-muted/50 p-3 rounded-md text-sm">
+                              <p className="font-medium mb-1">Summary:</p>
+                              <p className="text-muted-foreground">
+                                Content will be created every {recurrenceInterval} {recurrenceType}
+                                {recurrenceEndDate ? ` until ${format(recurrenceEndDate, "PPP")}` : ' indefinitely'}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </>
                   )}
                 </>
               ) : (
@@ -498,6 +612,27 @@ const Calendar = () => {
                       <div className="flex items-center gap-2 text-sm">
                         <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                         <span>{format(new Date(selectedItem.scheduled_at), "PPP 'at' p")}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedItem?.is_recurring && (
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <Repeat className="h-4 w-4" />
+                        Recurring Schedule
+                      </Label>
+                      <div className="text-sm bg-muted/50 p-3 rounded-md space-y-1">
+                        <p>
+                          Repeats every {selectedItem.recurrence_interval}{' '}
+                          {selectedItem.recurrence_type}
+                          {selectedItem.recurrence_interval > 1 ? 's' : ''}
+                        </p>
+                        {selectedItem.recurrence_end_date && (
+                          <p className="text-muted-foreground">
+                            Until {format(new Date(selectedItem.recurrence_end_date), "PPP")}
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}

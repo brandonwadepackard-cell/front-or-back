@@ -37,6 +37,8 @@ const Library = () => {
   const [newCategory, setNewCategory] = useState('');
   const [filterType, setFilterType] = useState<LibraryItemType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
+  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -220,6 +222,7 @@ const Library = () => {
         tags: [],
         categories: []
       });
+      setSuggestedTags([]);
     },
     onError: (error) => {
       console.error('Error adding item:', error);
@@ -264,6 +267,67 @@ const Library = () => {
       toast.success('Category created!');
     }
   });
+
+  // Generate AI tag suggestions
+  const generateTagSuggestions = async () => {
+    if (!newItem.title) {
+      toast.error('Please add a title first');
+      return;
+    }
+
+    setIsGeneratingSuggestions(true);
+    try {
+      // For photos, convert file to data URL for AI analysis
+      let imageUrl = null;
+      if (newItem.type === 'photo' && newItem.file) {
+        const reader = new FileReader();
+        imageUrl = await new Promise<string>((resolve) => {
+          reader.onload = (e) => resolve(e.target?.result as string);
+          reader.readAsDataURL(newItem.file!);
+        });
+      }
+
+      const { data, error } = await supabase.functions.invoke('suggest-tags', {
+        body: {
+          type: newItem.type,
+          title: newItem.title,
+          description: newItem.description,
+          content: newItem.content,
+          imageUrl
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.tags && Array.isArray(data.tags)) {
+        setSuggestedTags(data.tags);
+        toast.success(`Generated ${data.tags.length} tag suggestions!`);
+      }
+    } catch (error) {
+      console.error('Error generating tag suggestions:', error);
+      toast.error('Failed to generate tag suggestions');
+    } finally {
+      setIsGeneratingSuggestions(false);
+    }
+  };
+
+  // Accept a suggested tag
+  const acceptSuggestedTag = async (tagName: string) => {
+    // Check if tag already exists
+    const existingTag = allTags.find(t => t.name.toLowerCase() === tagName.toLowerCase());
+    
+    if (existingTag) {
+      if (!newItem.tags.includes(existingTag.id)) {
+        setNewItem(prev => ({ ...prev, tags: [...prev.tags, existingTag.id] }));
+      }
+    } else {
+      // Create new tag
+      addTagMutation.mutate(tagName);
+    }
+    
+    // Remove from suggestions
+    setSuggestedTags(prev => prev.filter(t => t !== tagName));
+  };
 
   const getTypeIcon = (type: LibraryItemType) => {
     switch (type) {
@@ -371,7 +435,38 @@ const Library = () => {
               )}
 
               <div>
-                <Label>Tags</Label>
+                <div className="flex items-center justify-between mb-2">
+                  <Label>Tags</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={generateTagSuggestions}
+                    disabled={isGeneratingSuggestions || !newItem.title}
+                  >
+                    {isGeneratingSuggestions ? 'Generating...' : 'AI Suggest Tags'}
+                  </Button>
+                </div>
+                
+                {suggestedTags.length > 0 && (
+                  <div className="mb-3 p-3 bg-muted/50 rounded-lg">
+                    <p className="text-sm font-medium mb-2">Suggested Tags:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {suggestedTags.map(tag => (
+                        <Badge 
+                          key={tag} 
+                          variant="outline" 
+                          className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                          onClick={() => acceptSuggestedTag(tag)}
+                        >
+                          {tag}
+                          <Plus className="h-3 w-3 ml-1" />
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex flex-wrap gap-2 mb-2">
                   {newItem.tags.map(tagId => {
                     const tag = allTags.find(t => t.id === tagId);

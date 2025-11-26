@@ -1,5 +1,5 @@
 import { NavLink } from "@/components/NavLink";
-import { Brain, Menu } from "lucide-react";
+import { Brain, Menu, Home, FileText, Layout, Clock, BarChart, Calendar, CalendarRange } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,37 +28,44 @@ export const Navigation = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-background z-50">
               <DropdownMenuItem asChild>
-                <NavLink to="/" end className="w-full cursor-pointer">
+                <NavLink to="/" end className="w-full cursor-pointer flex items-center gap-2">
+                  <Home className="h-4 w-4" />
                   Home
                 </NavLink>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <NavLink to="/content" className="w-full cursor-pointer">
+                <NavLink to="/content" className="w-full cursor-pointer flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
                   Content Generator
                 </NavLink>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <NavLink to="/templates" className="w-full cursor-pointer">
+                <NavLink to="/templates" className="w-full cursor-pointer flex items-center gap-2">
+                  <Layout className="h-4 w-4" />
                   Templates
                 </NavLink>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <NavLink to="/history" className="w-full cursor-pointer">
+                <NavLink to="/history" className="w-full cursor-pointer flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
                   History
                 </NavLink>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <NavLink to="/analytics" className="w-full cursor-pointer">
+                <NavLink to="/analytics" className="w-full cursor-pointer flex items-center gap-2">
+                  <BarChart className="h-4 w-4" />
                   Analytics
                 </NavLink>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <NavLink to="/calendar" className="w-full cursor-pointer">
+                <NavLink to="/calendar" className="w-full cursor-pointer flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
                   Calendar
                 </NavLink>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <NavLink to="/bulk-schedule" className="w-full cursor-pointer">
+                <NavLink to="/bulk-schedule" className="w-full cursor-pointer flex items-center gap-2">
+                  <CalendarRange className="h-4 w-4" />
                   Bulk Schedule
                 </NavLink>
               </DropdownMenuItem>

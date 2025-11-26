@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 
 export const Navigation = () => {
@@ -26,6 +27,7 @@ export const Navigation = () => {
           </NavLink>
           
           <div className="flex items-center gap-2">
+            <NotificationCenter />
             <ThemeToggle />
             <DropdownMenu>
             <DropdownMenuTrigger asChild>

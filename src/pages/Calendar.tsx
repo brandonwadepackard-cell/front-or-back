@@ -248,6 +248,16 @@ const Calendar = () => {
     return emojis[platform.toLowerCase()] || "📱";
   };
 
+  const getPlatformColor = (platform: string) => {
+    const colors: Record<string, string> = {
+      twitter: "bg-platform-twitter/10 hover:bg-platform-twitter/20 border-platform-twitter/30 text-platform-twitter-foreground",
+      linkedin: "bg-platform-linkedin/10 hover:bg-platform-linkedin/20 border-platform-linkedin/30 text-platform-linkedin-foreground",
+      instagram: "bg-platform-instagram/10 hover:bg-platform-instagram/20 border-platform-instagram/30 text-platform-instagram-foreground",
+      all: "bg-platform-all/10 hover:bg-platform-all/20 border-platform-all/30 text-platform-all-foreground",
+    };
+    return colors[platform.toLowerCase()] || "bg-primary/10 hover:bg-primary/20 border-primary/20";
+  };
+
   const previousMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
   const today = () => setCurrentMonth(new Date());
@@ -345,8 +355,8 @@ const Calendar = () => {
                               onClick={(e) => handleItemClick(item, e)}
                               className={cn(
                                 "p-2 rounded text-xs cursor-pointer",
-                                "bg-primary/10 hover:bg-primary/20",
-                                "border border-primary/20",
+                                getPlatformColor(item.platform),
+                                "border",
                                 "transition-all duration-200",
                                 draggedItem?.id === item.id && "opacity-50"
                               )}

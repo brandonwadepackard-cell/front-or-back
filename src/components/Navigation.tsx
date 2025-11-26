@@ -1,5 +1,5 @@
 import { NavLink } from "@/components/NavLink";
-import { Brain, Menu, Home, FileText, Layout, Clock, BarChart, Calendar, CalendarRange } from "lucide-react";
+import { Brain, Menu, Home, LayoutDashboard, FileText, Layout, Clock, BarChart, Calendar, CalendarRange } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +42,13 @@ export const Navigation = () => {
                   <Home className="h-4 w-4" />
                   Home
                   <DropdownMenuShortcut>⌘⇧H</DropdownMenuShortcut>
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/dashboard" className="w-full cursor-pointer flex items-center gap-2">
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                  <DropdownMenuShortcut>⌘⇧D</DropdownMenuShortcut>
                 </NavLink>
               </DropdownMenuItem>
               

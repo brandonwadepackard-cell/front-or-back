@@ -13,6 +13,10 @@ export const useKeyboardShortcuts = () => {
             e.preventDefault();
             navigate("/");
             break;
+          case "d":
+            e.preventDefault();
+            navigate("/dashboard");
+            break;
           case "c":
             e.preventDefault();
             navigate("/content");

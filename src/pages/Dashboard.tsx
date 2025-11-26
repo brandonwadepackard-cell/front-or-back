@@ -14,7 +14,9 @@ import {
   Sparkles,
   Plus,
   Layout,
-  BarChart
+  BarChart,
+  Download,
+  FileDown
 } from "lucide-react";
 import { formatDistanceToNow, format, subDays, startOfDay, endOfDay } from "date-fns";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -33,6 +35,14 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { exportToCSV, exportContentToPDF } from "@/lib/export-utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface ContentStats {
   total: number;
@@ -66,10 +76,12 @@ export default function Dashboard() {
     draft: 0,
   });
   const [recentContent, setRecentContent] = useState<any[]>([]);
+  const [allContent, setAllContent] = useState<any[]>([]);
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [platformData, setPlatformData] = useState<PlatformData[]>([]);
   const [loading, setLoading] = useState(true);
   const { notifications } = useNotifications();
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchDashboardData();
@@ -93,6 +105,7 @@ export default function Dashboard() {
 
       setStats({ total, scheduled, published, draft });
       setRecentContent(content?.slice(0, 5) || []);
+      setAllContent(content || []);
 
       // Prepare chart data for last 7 days
       const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -210,7 +223,23 @@ export default function Dashboard() {
       case "instagram":
         return "bg-pink-500";
       default:
-        return "bg-gray-500";
+      return "bg-gray-500";
+    }
+  };
+
+  const handleExport = (format: "csv" | "pdf") => {
+    if (format === "csv") {
+      exportToCSV(allContent);
+      toast({
+        title: "Export Successful",
+        description: "Content data exported to CSV",
+      });
+    } else {
+      exportContentToPDF(allContent);
+      toast({
+        title: "Export Successful",
+        description: "Content data exported to PDF",
+      });
     }
   };
 
@@ -218,11 +247,33 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back! Here's what's happening with your content.
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
+            <p className="text-muted-foreground">
+              Welcome back! Here's what's happening with your content.
+            </p>
+          </div>
+          
+          {/* Export Button */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleExport("csv")} className="gap-2">
+                <FileDown className="h-4 w-4" />
+                Export as CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport("pdf")} className="gap-2">
+                <FileDown className="h-4 w-4" />
+                Export as PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Statistics Cards */}

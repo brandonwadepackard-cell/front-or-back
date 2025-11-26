@@ -5,8 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Loader2, ExternalLink, DollarSign, Mail, Phone, Linkedin, Twitter, TrendingUp, LineChart } from "lucide-react";
+import { ArrowLeft, Loader2, ExternalLink, DollarSign, Mail, Phone, Linkedin, Twitter, TrendingUp, LineChart, Download, FileJson, FileText, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
+import { exportToCSV, exportToJSON, exportToPDF } from "@/lib/scraper-export-utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ScrapeResult {
   id: string;
@@ -133,12 +140,57 @@ const ScraperResults = () => {
   const totalPrices = results.reduce((sum, r) => sum + (r.prices?.length || 0), 0);
   const totalContacts = results.reduce((sum, r) => sum + (r.contacts?.length || 0), 0);
 
+  const handleExport = (format: 'csv' | 'json' | 'pdf') => {
+    try {
+      if (format === 'csv') {
+        exportToCSV(results, job);
+        toast.success('CSV exported successfully!');
+      } else if (format === 'json') {
+        exportToJSON(results, job, priceHistory);
+        toast.success('JSON exported successfully!');
+      } else if (format === 'pdf') {
+        exportToPDF(results, job, priceHistory);
+        toast.success('PDF exported successfully!');
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export results');
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <Button variant="ghost" onClick={() => navigate('/scraper')}>
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Jobs
-      </Button>
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" onClick={() => navigate('/scraper')}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Jobs
+        </Button>
+        
+        {results.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Export Results
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleExport('csv')} className="cursor-pointer">
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Export as CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('json')} className="cursor-pointer">
+                <FileJson className="h-4 w-4 mr-2" />
+                Export as JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('pdf')} className="cursor-pointer">
+                <FileText className="h-4 w-4 mr-2" />
+                Export as PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
 
       {/* Job Info */}
       <Card>

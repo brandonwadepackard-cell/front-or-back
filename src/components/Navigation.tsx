@@ -9,7 +9,7 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useLocation } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const Navigation = () => {
   return (
@@ -21,7 +21,9 @@ export const Navigation = () => {
             <span>Brandon Hub</span>
           </NavLink>
           
-          <DropdownMenu>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="gap-2">
                 <Menu className="h-4 w-4" />
@@ -82,6 +84,7 @@ export const Navigation = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
         </div>
       </div>
     </nav>

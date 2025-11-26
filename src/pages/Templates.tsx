@@ -25,13 +25,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Sparkles } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Trash2, Sparkles, Library, User, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { starterTemplates, categories } from "@/lib/starter-templates";
 
 const Templates = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [platformFilter, setPlatformFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     topic: "",
@@ -125,22 +131,144 @@ const Templates = () => {
     return emojis[platform.toLowerCase()] || "📱";
   };
 
+  const filteredStarterTemplates = starterTemplates.filter((template) => {
+    const matchesCategory = categoryFilter === "all" || template.category === categoryFilter;
+    const matchesPlatform = platformFilter === "all" || template.platform === platformFilter;
+    const matchesSearch = 
+      searchTerm === "" ||
+      template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      template.description.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCategory && matchesPlatform && matchesSearch;
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto px-6 py-12">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-4xl font-bold mb-2">Content Templates</h1>
-              <p className="text-muted-foreground">
-                Save and reuse content generation settings
-              </p>
-            </div>
-            <Button onClick={() => setShowCreate(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Template
-            </Button>
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold mb-2">Content Templates</h1>
+            <p className="text-muted-foreground">
+              Start with pre-made templates or create your own
+            </p>
           </div>
+
+          <Tabs defaultValue="starter" className="space-y-6">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="starter" className="gap-2">
+                <Library className="h-4 w-4" />
+                Starter Templates
+              </TabsTrigger>
+              <TabsTrigger value="my-templates" className="gap-2">
+                <User className="h-4 w-4" />
+                My Templates
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Starter Templates Tab */}
+            <TabsContent value="starter" className="space-y-6">
+              {/* Filters */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Filter Templates</CardTitle>
+                  <CardDescription>Find the perfect template for your needs</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search templates..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-9"
+                      />
+                    </div>
+                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.value} value={cat.value}>
+                            {cat.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={platformFilter} onValueChange={setPlatformFilter}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Platform" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Platforms</SelectItem>
+                        <SelectItem value="twitter">Twitter</SelectItem>
+                        <SelectItem value="linkedin">LinkedIn</SelectItem>
+                        <SelectItem value="instagram">Instagram</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Results */}
+              {filteredStarterTemplates.length > 0 ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredStarterTemplates.map((template) => (
+                    <Card key={template.id} className="hover:shadow-lg transition-all hover:border-primary/50">
+                      <CardHeader>
+                        <div className="flex items-start justify-between mb-2">
+                          <Badge variant="secondary">{template.category}</Badge>
+                          <span className="text-2xl">{getPlatformEmoji(template.platform)}</span>
+                        </div>
+                        <CardTitle className="text-lg">{template.name}</CardTitle>
+                        <CardDescription>{template.description}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="p-3 bg-muted rounded-lg">
+                            <p className="text-xs font-medium mb-1 text-muted-foreground">Example:</p>
+                            <p className="text-sm italic">{template.example}</p>
+                          </div>
+                          <Button
+                            className="w-full"
+                            onClick={() => handleUse(template)}
+                          >
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Use Template
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <p className="text-muted-foreground">No templates match your filters</p>
+                    <Button
+                      variant="outline"
+                      className="mt-4"
+                      onClick={() => {
+                        setSearchTerm("");
+                        setCategoryFilter("all");
+                        setPlatformFilter("all");
+                      }}
+                    >
+                      Clear Filters
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            {/* My Templates Tab */}
+            <TabsContent value="my-templates" className="space-y-6">
+              <div className="flex justify-end">
+                <Button onClick={() => setShowCreate(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Template
+                </Button>
+              </div>
 
           {isLoading ? (
             <div className="text-center py-12">
@@ -197,7 +325,7 @@ const Templates = () => {
           ) : (
             <Card>
               <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground mb-4">No templates yet</p>
+                <p className="text-muted-foreground mb-4">No custom templates yet</p>
                 <Button onClick={() => setShowCreate(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Your First Template
@@ -205,6 +333,8 @@ const Templates = () => {
               </CardContent>
             </Card>
           )}
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Create Dialog */}

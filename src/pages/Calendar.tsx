@@ -25,6 +25,7 @@ import { ChevronLeft, ChevronRight, Clock, Copy, Check, CalendarIcon, Trash2, Re
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek } from "date-fns";
 import { cn } from "@/lib/utils";
 import { PlatformPreview } from "@/components/PlatformPreview";
+import { ContentOptimizer } from "@/components/ContentOptimizer";
 
 interface ContentItem {
   id: string;
@@ -463,6 +464,17 @@ const Calendar = () => {
                       className="min-h-[200px] resize-none"
                     />
                   </div>
+
+                  {/* Content Optimizer */}
+                  {selectedItem && (
+                    <ContentOptimizer
+                      content={editedContent}
+                      platform={selectedItem.platform}
+                      onHashtagsSelect={(hashtags) => {
+                        setEditedContent(prev => `${prev}\n\n${hashtags.map(h => `#${h}`).join(' ')}`);
+                      }}
+                    />
+                  )}
 
                   <div className="space-y-2">
                     <Label>Status</Label>

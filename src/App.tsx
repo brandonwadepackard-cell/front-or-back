@@ -10,6 +10,7 @@ import ContentHistory from "./pages/ContentHistory";
 import Templates from "./pages/Templates";
 import Analytics from "./pages/Analytics";
 import Calendar from "./pages/Calendar";
+import BulkSchedule from "./pages/BulkSchedule";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/templates" element={<Templates />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/calendar" element={<Calendar />} />
+          <Route path="/bulk-schedule" element={<BulkSchedule />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

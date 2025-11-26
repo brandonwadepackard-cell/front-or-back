@@ -55,6 +55,13 @@ export const Navigation = () => {
             >
               Calendar
             </NavLink>
+            <NavLink
+              to="/bulk-schedule"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              activeClassName="text-foreground font-medium"
+            >
+              Bulk Schedule
+            </NavLink>
           </div>
         </div>
       </div>

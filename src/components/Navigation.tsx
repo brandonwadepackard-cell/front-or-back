@@ -48,6 +48,13 @@ export const Navigation = () => {
             >
               Analytics
             </NavLink>
+            <NavLink
+              to="/calendar"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              activeClassName="text-foreground font-medium"
+            >
+              Calendar
+            </NavLink>
           </div>
         </div>
       </div>

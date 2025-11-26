@@ -171,6 +171,15 @@ All colors MUST be HSL.
     @apply bg-background text-foreground font-body;
   }
   
+  /* QR Scanner styling - hide app content during scanning */
+  body.scanner-active {
+    visibility: hidden;
+  }
+  
+  body.scanner-active .scanner-overlay {
+    visibility: visible;
+  }
+  
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading;
   }

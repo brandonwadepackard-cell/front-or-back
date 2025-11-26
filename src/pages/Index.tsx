@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, ArrowRight, Zap, Target, TrendingUp } from "lucide-react";
+import { Sparkles, ArrowRight, Zap, Target, TrendingUp, Search } from "lucide-react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { ParallaxHero } from "@/components/ParallaxHero";
 
@@ -67,6 +67,31 @@ const Index = () => {
                 <Link to="/content">
                   <Button className="w-full group/btn">
                     Start Creating
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:-translate-y-2 transition-all duration-300 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm border border-border/50 animate-slide-up" style={{ animationDelay: "100ms" }}>
+              <CardHeader className="pb-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
+                  <Search className="w-7 h-7 text-white" />
+                </div>
+                <CardTitle className="text-2xl">Web Scraper</CardTitle>
+                <CardDescription className="text-base">
+                  Automated data collection with recurring jobs, price tracking, and email notifications
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-0">Recurring Jobs</Badge>
+                  <Badge variant="secondary" className="bg-cyan-500/10 text-cyan-600 border-0">Price Tracking</Badge>
+                  <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-0">Email Alerts</Badge>
+                </div>
+                <Link to="/scraper">
+                  <Button className="w-full group/btn">
+                    Start Scraping
                     <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
                   </Button>
                 </Link>

@@ -73,7 +73,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="group hover:-translate-y-2 transition-all duration-300 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm border border-border/50 animate-slide-up" style={{ animationDelay: "100ms" }}>
+            <Card className="group hover:-translate-y-2 transition-all duration-300 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm border border-border/50 animate-slide-up" style={{ animationDelay: "150ms" }}>
               <CardHeader className="pb-4">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
                   <Search className="w-7 h-7 text-white" />
@@ -98,7 +98,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="group hover:-translate-y-2 transition-all duration-300 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm border border-border/50 animate-slide-up" style={{ animationDelay: "200ms" }}>
+            <Card className="group hover:-translate-y-2 transition-all duration-300 bg-gradient-to-br from-card to-card/50 backdrop-blur-sm border border-border/50 animate-slide-up" style={{ animationDelay: "300ms" }}>
               <CardHeader className="pb-4">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg">
                   <FolderOpen className="w-7 h-7 text-white" />

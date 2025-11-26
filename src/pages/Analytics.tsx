@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, FileText, TrendingUp, Layout } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { BarChart3, FileText, TrendingUp, Layout, Download, FileDown } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 import {
   ChartContainer,
@@ -22,8 +23,18 @@ import {
   Bar,
   Legend,
 } from "recharts";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { exportAnalyticsToCSV, exportAnalyticsToPDF } from "@/lib/export-utils";
+import { useToast } from "@/hooks/use-toast";
 
 const Analytics = () => {
+  const { toast } = useToast();
+  
   const { data: content } = useQuery({
     queryKey: ["analytics-content"],
     queryFn: async () => {
@@ -89,14 +100,61 @@ const Analytics = () => {
     },
   };
 
+  const handleExport = (format: "csv" | "pdf") => {
+    const analyticsData = {
+      totalContent,
+      scheduled: scheduledContent,
+      published: publishedContent,
+      draft: draftContent,
+      platformData,
+      trendData: last7Days.map(d => ({ date: d.date, content: d.count })),
+    };
+
+    if (format === "csv") {
+      exportAnalyticsToCSV(analyticsData);
+      toast({
+        title: "Export Successful",
+        description: "Analytics data exported to CSV",
+      });
+    } else {
+      exportAnalyticsToPDF(analyticsData);
+      toast({
+        title: "Export Successful",
+        description: "Analytics data exported to PDF",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6 space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">Analytics Dashboard</h1>
-          <p className="text-muted-foreground">
-            Track your content performance and generation trends
-          </p>
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-foreground">Analytics Dashboard</h1>
+            <p className="text-muted-foreground">
+              Track your content performance and generation trends
+            </p>
+          </div>
+          
+          {/* Export Button */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Export Data
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleExport("csv")} className="gap-2">
+                <FileDown className="h-4 w-4" />
+                Export as CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport("pdf")} className="gap-2">
+                <FileDown className="h-4 w-4" />
+                Export as PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Key Metrics */}

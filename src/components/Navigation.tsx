@@ -28,6 +28,13 @@ export const Navigation = () => {
               Content Generator
             </NavLink>
             <NavLink
+              to="/templates"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              activeClassName="text-foreground font-medium"
+            >
+              Templates
+            </NavLink>
+            <NavLink
               to="/history"
               className="text-muted-foreground hover:text-foreground transition-colors"
               activeClassName="text-foreground font-medium"

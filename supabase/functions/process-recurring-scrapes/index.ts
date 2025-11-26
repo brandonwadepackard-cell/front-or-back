@@ -66,10 +66,40 @@ serve(async (req) => {
 
       if (insertError) {
         console.error(`Error creating new job for ${job.id}:`, insertError);
+        
+        // Send failure notification
+        try {
+          await supabase.functions.invoke('send-scrape-notification', {
+            body: {
+              user_id: job.user_id,
+              job_name: job.name || job.query,
+              status: 'failed',
+              error_message: insertError.message
+            }
+          });
+        } catch (notificationError) {
+          console.error('Failed to send notification:', notificationError);
+        }
+        
         continue;
       }
 
       console.log(`Created new job: ${newJob.id}`);
+
+      // Send success notification
+      try {
+        await supabase.functions.invoke('send-scrape-notification', {
+          body: {
+            user_id: job.user_id,
+            job_name: job.name || job.query,
+            status: 'completed',
+            results_count: 0 // Will be updated when scrape completes
+          }
+        });
+      } catch (notificationError) {
+        console.error('Failed to send notification:', notificationError);
+        // Don't fail the whole process if notification fails
+      }
 
       // Calculate next run time
       const nextRun = calculateNextRun(job.recurrence_interval, job.recurrence_time);

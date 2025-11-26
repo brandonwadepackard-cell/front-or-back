@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.suggest-library-content]
 verify_jwt = false
+
+[functions.transcribe-media]
+verify_jwt = false

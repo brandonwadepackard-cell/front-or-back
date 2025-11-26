@@ -9,6 +9,7 @@ import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { StatCardSkeleton, ChartSkeleton, ContentListSkeleton, QuickActionSkeleton } from "@/components/skeletons/CardSkeleton";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { LongPressContextMenu } from "@/components/LongPressContextMenu";
+import { DoubleTapAction } from "@/components/DoubleTapAction";
 import { 
   FileText, 
   Calendar, 
@@ -25,7 +26,9 @@ import {
   Edit,
   Trash2,
   Copy,
-  Eye
+  Eye,
+  Heart,
+  Archive
 } from "lucide-react";
 import { formatDistanceToNow, format, subDays, startOfDay, endOfDay } from "date-fns";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -86,6 +89,7 @@ export default function Dashboard() {
   });
   const [recentContent, setRecentContent] = useState<any[]>([]);
   const [allContent, setAllContent] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [platformData, setPlatformData] = useState<PlatformData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -518,6 +522,27 @@ export default function Dashboard() {
                         key={item.id}
                         menuItems={[
                           {
+                            icon: <Heart />,
+                            label: favorites.has(item.id) ? 'Unfavorite' : 'Favorite',
+                            action: () => {
+                              setFavorites(prev => {
+                                const newFavorites = new Set(prev);
+                                if (newFavorites.has(item.id)) {
+                                  newFavorites.delete(item.id);
+                                  toast({
+                                    title: "Removed from Favorites",
+                                  });
+                                } else {
+                                  newFavorites.add(item.id);
+                                  toast({
+                                    title: "Added to Favorites",
+                                  });
+                                }
+                                return newFavorites;
+                              });
+                            },
+                          },
+                          {
                             icon: <Eye />,
                             label: 'View Details',
                             action: () => {
@@ -548,6 +573,24 @@ export default function Dashboard() {
                             },
                           },
                           {
+                            icon: <Archive />,
+                            label: 'Archive',
+                            action: async () => {
+                              const { error } = await supabase
+                                .from('content')
+                                .update({ status: 'archived' })
+                                .eq('id', item.id);
+                              
+                              if (!error) {
+                                toast({
+                                  title: "Content Archived",
+                                  description: "Content moved to archive",
+                                });
+                                fetchDashboardData();
+                              }
+                            },
+                          },
+                          {
                             icon: <Trash2 />,
                             label: 'Delete',
                             action: async () => {
@@ -568,34 +611,61 @@ export default function Dashboard() {
                           },
                         ]}
                       >
-                        <div className="border border-border/50 rounded-xl p-4 hover:bg-accent/50 hover:border-primary/50 transition-all duration-200">
-                          <div className="flex items-start justify-between mb-3">
-                            <Badge className={getPlatformBadge(item.platform)}>
-                              {item.platform}
-                            </Badge>
-                            <Badge variant="outline" className="capitalize">{item.status}</Badge>
-                          </div>
-                          <h4 className="font-semibold mb-2 text-base">{item.topic}</h4>
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                            {item.content}
-                          </p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            {formatDistanceToNow(new Date(item.created_at), {
-                              addSuffix: true,
-                            })}
-                            {item.scheduled_at && (
-                              <>
-                                <span>•</span>
-                                <Calendar className="h-3 w-3" />
-                                Scheduled for{" "}
-                                {formatDistanceToNow(new Date(item.scheduled_at), {
-                                  addSuffix: true,
-                                })}
-                              </>
+                        <DoubleTapAction
+                          onDoubleTap={() => {
+                            setFavorites(prev => {
+                              const newFavorites = new Set(prev);
+                              if (newFavorites.has(item.id)) {
+                                newFavorites.delete(item.id);
+                                toast({
+                                  title: "Removed from Favorites",
+                                  description: "Double-tap again to favorite",
+                                });
+                              } else {
+                                newFavorites.add(item.id);
+                                toast({
+                                  title: "Added to Favorites",
+                                  description: "Double-tap again to remove",
+                                });
+                              }
+                              return newFavorites;
+                            });
+                          }}
+                          icon={<Heart className="fill-current" />}
+                          feedbackText={favorites.has(item.id) ? "Unfavorited!" : "Favorited!"}
+                        >
+                          <div className="border border-border/50 rounded-xl p-4 hover:bg-accent/50 hover:border-primary/50 transition-all duration-200 relative">
+                            {favorites.has(item.id) && (
+                              <Heart className="absolute top-2 right-2 h-4 w-4 fill-red-500 text-red-500" />
                             )}
+                            <div className="flex items-start justify-between mb-3">
+                              <Badge className={getPlatformBadge(item.platform)}>
+                                {item.platform}
+                              </Badge>
+                              <Badge variant="outline" className="capitalize">{item.status}</Badge>
+                            </div>
+                            <h4 className="font-semibold mb-2 text-base">{item.topic}</h4>
+                            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                              {item.content}
+                            </p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {formatDistanceToNow(new Date(item.created_at), {
+                                addSuffix: true,
+                              })}
+                              {item.scheduled_at && (
+                                <>
+                                  <span>•</span>
+                                  <Calendar className="h-3 w-3" />
+                                  Scheduled for{" "}
+                                  {formatDistanceToNow(new Date(item.scheduled_at), {
+                                    addSuffix: true,
+                                  })}
+                                </>
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        </DoubleTapAction>
                       </LongPressContextMenu>
                     ))}
                   </div>

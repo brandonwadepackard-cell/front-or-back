@@ -3,11 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Sparkles, Copy, Check } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Loader2, Sparkles, Copy, Check, CalendarIcon } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export default function ContentGenerator() {
   const [searchParams] = useSearchParams();
@@ -15,6 +20,8 @@ export default function ContentGenerator() {
   const [platform, setPlatform] = useState<string>(searchParams.get("platform") || "all");
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [scheduledDate, setScheduledDate] = useState<Date>();
+  const [scheduledTime, setScheduledTime] = useState("12:00");
   const { toast } = useToast();
 
   // Update form when URL params change (from templates)
@@ -37,6 +44,49 @@ export default function ContentGenerator() {
       
       if (error) throw error;
       return data;
+    }
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: async ({ content, status }: { content: string; status: string }) => {
+      let scheduledAt = null;
+      
+      if (status === 'scheduled' && scheduledDate) {
+        const [hours, minutes] = scheduledTime.split(':');
+        const dateTime = new Date(scheduledDate);
+        dateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        scheduledAt = dateTime.toISOString();
+      }
+
+      const { error } = await supabase
+        .from('content')
+        .insert([{
+          topic: topic.trim(),
+          platform,
+          content,
+          status,
+          scheduled_at: scheduledAt
+        }]);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, { status }) => {
+      refetch();
+      toast({
+        title: status === 'scheduled' ? "Content scheduled!" : "Content saved!",
+        description: status === 'scheduled' 
+          ? `Content will be published on ${format(scheduledDate!, "PPP 'at' p")}`
+          : "Content saved as draft",
+      });
+      setTopic("");
+      setScheduledDate(undefined);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save content",
+        variant: "destructive"
+      });
     }
   });
 
@@ -63,16 +113,13 @@ export default function ContentGenerator() {
         throw new Error(data.error);
       }
 
-      toast({
-        title: "Content generated!",
-        description: `Created ${platform} content about "${topic}"`,
-      });
-
-      // Refetch to show new content
-      refetch();
-      
-      // Clear form
-      setTopic("");
+      // Auto-save generated content
+      if (data?.content) {
+        await saveMutation.mutateAsync({ 
+          content: data.content, 
+          status: scheduledDate ? 'scheduled' : 'draft' 
+        });
+      }
 
     } catch (error: any) {
       console.error('Generation error:', error);
@@ -165,7 +212,45 @@ export default function ContentGenerator() {
               </Select>
             </div>
 
-            <Button 
+            <div className="space-y-2">
+              <Label>Schedule Publication (Optional)</Label>
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "justify-start text-left font-normal flex-1",
+                        !scheduledDate && "text-muted-foreground"
+                      )}
+                      disabled={isGenerating}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {scheduledDate ? format(scheduledDate, "PPP") : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={scheduledDate}
+                      onSelect={setScheduledDate}
+                      disabled={(date) => date < new Date()}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                
+                <input
+                  type="time"
+                  value={scheduledTime}
+                  onChange={(e) => setScheduledTime(e.target.value)}
+                  className="px-3 py-2 border rounded-md bg-background"
+                  disabled={isGenerating}
+                />
+              </div>
+            </div>
+
+            <Button
               onClick={handleGenerate} 
               disabled={isGenerating || !topic.trim()}
               className="w-full"

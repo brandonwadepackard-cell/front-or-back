@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           id: string
           platform: string
+          scheduled_at: string | null
           status: string
           topic: string
         }
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string
           id?: string
           platform: string
+          scheduled_at?: string | null
           status?: string
           topic: string
         }
@@ -36,6 +38,7 @@ export type Database = {
           created_at?: string
           id?: string
           platform?: string
+          scheduled_at?: string | null
           status?: string
           topic?: string
         }

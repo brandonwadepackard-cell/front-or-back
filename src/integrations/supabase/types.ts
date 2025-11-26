@@ -220,6 +220,133 @@ export type Database = {
         }
         Relationships: []
       }
+      price_history: {
+        Row: {
+          currency: string | null
+          id: string
+          job_id: string
+          price: number
+          product_name: string | null
+          recorded_at: string
+          url: string
+        }
+        Insert: {
+          currency?: string | null
+          id?: string
+          job_id: string
+          price: number
+          product_name?: string | null
+          recorded_at?: string
+          url: string
+        }
+        Update: {
+          currency?: string | null
+          id?: string
+          job_id?: string
+          price?: number
+          product_name?: string | null
+          recorded_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_history_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "scrape_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scrape_jobs: {
+        Row: {
+          created_at: string
+          extract_contacts: boolean | null
+          extract_prices: boolean | null
+          id: string
+          name: string | null
+          query: string
+          sources: string[] | null
+          status: Database["public"]["Enums"]["job_status"] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          extract_contacts?: boolean | null
+          extract_prices?: boolean | null
+          id?: string
+          name?: string | null
+          query: string
+          sources?: string[] | null
+          status?: Database["public"]["Enums"]["job_status"] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          extract_contacts?: boolean | null
+          extract_prices?: boolean | null
+          id?: string
+          name?: string | null
+          query?: string
+          sources?: string[] | null
+          status?: Database["public"]["Enums"]["job_status"] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scrape_results: {
+        Row: {
+          ai_sentiment: string | null
+          ai_summary: string | null
+          contacts: Json | null
+          id: string
+          job_id: string
+          prices: Json | null
+          scraped_at: string
+          screenshot_path: string | null
+          text_content: string | null
+          title: string | null
+          url: string
+        }
+        Insert: {
+          ai_sentiment?: string | null
+          ai_summary?: string | null
+          contacts?: Json | null
+          id?: string
+          job_id: string
+          prices?: Json | null
+          scraped_at?: string
+          screenshot_path?: string | null
+          text_content?: string | null
+          title?: string | null
+          url: string
+        }
+        Update: {
+          ai_sentiment?: string | null
+          ai_summary?: string | null
+          contacts?: Json | null
+          id?: string
+          job_id?: string
+          prices?: Json | null
+          scraped_at?: string
+          screenshot_path?: string | null
+          text_content?: string | null
+          title?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scrape_results_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "scrape_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tags: {
         Row: {
           created_at: string
@@ -291,7 +418,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      job_status: "pending" | "running" | "completed" | "failed" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -418,6 +545,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      job_status: ["pending", "running", "completed", "failed", "cancelled"],
+    },
   },
 } as const

@@ -17,6 +17,8 @@ import Analytics from "./pages/Analytics";
 import Calendar from "./pages/Calendar";
 import BulkSchedule from "./pages/BulkSchedule";
 import Library from "./pages/Library";
+import Scraper from "./pages/Scraper";
+import ScraperResults from "./pages/ScraperResults";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +39,8 @@ const AnimatedRoutes = () => {
           <Route path="/calendar" element={<PageTransition><Calendar /></PageTransition>} />
           <Route path="/bulk-schedule" element={<PageTransition><BulkSchedule /></PageTransition>} />
           <Route path="/library" element={<PageTransition><Library /></PageTransition>} />
+          <Route path="/scraper" element={<PageTransition><Scraper /></PageTransition>} />
+          <Route path="/scraper/:jobId" element={<PageTransition><ScraperResults /></PageTransition>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>

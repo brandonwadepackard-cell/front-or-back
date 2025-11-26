@@ -1,5 +1,5 @@
 import { NavLink } from "@/components/NavLink";
-import { Brain, Menu, Home, LayoutDashboard, FileText, Layout, Clock, BarChart, Calendar, CalendarRange, Archive } from "lucide-react";
+import { Brain, Menu, Home, LayoutDashboard, FileText, Layout, Clock, BarChart, Calendar, CalendarRange, Archive, Globe } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -109,6 +109,16 @@ export const Navigation = () => {
                   <CalendarRange className="h-4 w-4" />
                   Bulk Schedule
                   <DropdownMenuShortcut>⌘⇧B</DropdownMenuShortcut>
+                </NavLink>
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Tools</DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <NavLink to="/scraper" className="w-full cursor-pointer flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  Web Scraper
+                  <DropdownMenuShortcut>⌘⇧W</DropdownMenuShortcut>
                 </NavLink>
               </DropdownMenuItem>
             </DropdownMenuContent>

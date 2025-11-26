@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { StatCardSkeleton, ChartSkeleton, ContentListSkeleton, QuickActionSkeleton } from "@/components/skeletons/CardSkeleton";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import { 
   FileText, 
   Calendar, 
@@ -244,7 +245,8 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <AnimatedBackground variant="mesh" />
-      <div className="container mx-auto px-6 py-12 space-y-8 relative z-10">
+      <PullToRefresh onRefresh={fetchDashboardData}>
+        <div className="container mx-auto px-6 py-12 space-y-8 relative z-10">
         {/* Header */}
         <div className="flex items-start justify-between animate-fade-in">
           <div className="space-y-2">
@@ -566,6 +568,7 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
+      </PullToRefresh>
     </div>
   );
 }

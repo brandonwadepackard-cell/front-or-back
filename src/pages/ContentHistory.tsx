@@ -10,6 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -158,6 +159,10 @@ const ContentHistory = () => {
   const handleRegenerate = () => {
     if (selectedIds.length === 0) return;
     regenerateMutation.mutate(selectedIds);
+  };
+
+  const handleRefresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["content-history"] });
   };
 
   const bulkStatusMutation = useMutation({
@@ -369,7 +374,8 @@ const ContentHistory = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="container mx-auto px-6 py-12">
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="container mx-auto px-6 py-12">
         <div className="max-w-6xl mx-auto">
           <ScrollReveal variant="fade-up">
             <div className="mb-8">
@@ -726,6 +732,7 @@ const ContentHistory = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+      </PullToRefresh>
     </div>
   );
 };

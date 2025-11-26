@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { AICopilot } from "@/components/AICopilot";
 import Index from "./pages/Index";
+import Dashboard from "./pages/Dashboard";
 import ContentGenerator from "./pages/ContentGenerator";
 import ContentHistory from "./pages/ContentHistory";
 import Templates from "./pages/Templates";
@@ -25,6 +26,7 @@ const App = () => (
         <Navigation />
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/content" element={<ContentGenerator />} />
           <Route path="/history" element={<ContentHistory />} />
           <Route path="/templates" element={<Templates />} />

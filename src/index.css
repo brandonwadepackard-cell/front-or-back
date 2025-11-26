@@ -43,6 +43,11 @@ All colors MUST be HSL.
     --gradient-secondary: linear-gradient(135deg, hsl(220 14% 96%), hsl(210 20% 98%));
     --gradient-accent: linear-gradient(135deg, hsl(262 70% 95%), hsl(288 70% 97%));
     
+    /* Glow effects */
+    --glow-primary: 0 0 20px hsl(262 83% 58% / 0.3), 0 0 40px hsl(262 83% 58% / 0.1);
+    --glow-secondary: 0 0 20px hsl(220 14% 40% / 0.2);
+    --glow-accent: 0 0 20px hsl(262 70% 70% / 0.3), 0 0 40px hsl(262 70% 70% / 0.1);
+    
     /* Template category colors */
     --template-marketing: 14 100% 57%;
     --template-marketing-bg: 14 100% 97%;
@@ -118,6 +123,11 @@ All colors MUST be HSL.
     --gradient-secondary: linear-gradient(135deg, hsl(215 28% 17%), hsl(224 71% 6%));
     --gradient-accent: linear-gradient(135deg, hsl(262 50% 15%), hsl(288 50% 17%));
     
+    /* Glow effects - dark */
+    --glow-primary: 0 0 30px hsl(262 83% 58% / 0.5), 0 0 60px hsl(262 83% 58% / 0.2);
+    --glow-secondary: 0 0 20px hsl(220 14% 60% / 0.3);
+    --glow-accent: 0 0 30px hsl(262 70% 70% / 0.4), 0 0 60px hsl(262 70% 70% / 0.15);
+    
     /* Template category colors - dark */
     --template-marketing: 14 100% 57%;
     --template-marketing-bg: 14 100% 12%;
@@ -163,5 +173,67 @@ All colors MUST be HSL.
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading;
+  }
+}
+
+@layer utilities {
+  /* Hover scale effects */
+  .hover-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .hover-lift:hover {
+    @apply -translate-y-1;
+  }
+  
+  .hover-scale {
+    @apply transition-transform duration-300 ease-out;
+  }
+  
+  .hover-scale:hover {
+    @apply scale-105;
+  }
+  
+  .hover-scale-sm {
+    @apply transition-transform duration-300 ease-out;
+  }
+  
+  .hover-scale-sm:hover {
+    @apply scale-[1.02];
+  }
+  
+  /* Glow effects */
+  .hover-glow-primary {
+    @apply transition-all duration-300;
+  }
+  
+  .hover-glow-primary:hover {
+    box-shadow: var(--glow-primary);
+  }
+  
+  .hover-glow-accent {
+    @apply transition-all duration-300;
+  }
+  
+  .hover-glow-accent:hover {
+    box-shadow: var(--glow-accent);
+  }
+  
+  /* Interactive card effects */
+  .interactive-card {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .interactive-card:hover {
+    @apply -translate-y-2 shadow-2xl;
+  }
+  
+  .interactive-card-glow {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .interactive-card-glow:hover {
+    @apply -translate-y-2;
+    box-shadow: 0 20px 40px hsl(var(--primary) / 0.15), 0 10px 20px hsl(var(--primary) / 0.1);
   }
 }

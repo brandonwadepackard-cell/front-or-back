@@ -57,21 +57,21 @@ All colors MUST be HSL.
     --template-seasonal: 280 67% 60%;
     --template-seasonal-bg: 280 67% 97%;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 220 14% 98%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-foreground: 222.2 47.4% 11.2%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary: 262 83% 58%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-primary-foreground: 0 0% 100%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent: 262 70% 95%;
 
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-accent-foreground: 262 83% 58%;
 
     --sidebar-border: 220 13% 91%;
 
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 262 83% 58%;
 
     /* Platform colors for calendar */
     --platform-twitter: 203 89% 53%;
@@ -106,8 +106,8 @@ All colors MUST be HSL.
     --accent: 215 28% 17%;
     --accent-foreground: 262 83% 58%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
 
     --border: 215 28% 17%;
     --input: 215 28% 17%;
@@ -131,14 +131,14 @@ All colors MUST be HSL.
     --template-updates-bg: 45 93% 12%;
     --template-seasonal: 280 67% 60%;
     --template-seasonal-bg: 280 67% 12%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-background: 224 71% 4%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 262 83% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 215 28% 17%;
+    --sidebar-accent-foreground: 262 83% 58%;
+    --sidebar-border: 215 28% 17%;
+    --sidebar-ring: 262 83% 58%;
 
     /* Platform colors for calendar - dark mode */
     --platform-twitter: 203 89% 53%;

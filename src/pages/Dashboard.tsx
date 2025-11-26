@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
+import { StatCardSkeleton, ChartSkeleton, ContentListSkeleton, QuickActionSkeleton } from "@/components/skeletons/CardSkeleton";
 import { 
   FileText, 
   Calendar, 
@@ -277,7 +278,12 @@ export default function Dashboard() {
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-slide-up">
-          {statCards.map((stat, index) => (
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <StatCardSkeleton key={i} />
+            ))
+          ) : (
+            statCards.map((stat, index) => (
             <Card 
               key={stat.title} 
               className="overflow-hidden hover:-translate-y-1 transition-all duration-300 bg-card/80 backdrop-blur-sm border-0"
@@ -303,7 +309,8 @@ export default function Dashboard() {
                 </p>
               </CardContent>
             </Card>
-          ))}
+          ))
+          )}
         </div>
 
         {/* Quick Actions */}
@@ -312,7 +319,12 @@ export default function Dashboard() {
             <h2 className="text-3xl font-bold">Quick Actions</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {quickActions.map((action, index) => (
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <QuickActionSkeleton key={i} />
+              ))
+            ) : (
+              quickActions.map((action, index) => (
               <Link key={action.title} to={action.link}>
                 <Card className="group hover:-translate-y-2 transition-all duration-300 cursor-pointer h-full border-0 bg-card/80 backdrop-blur-sm overflow-hidden animate-slide-up"
                   style={{ animationDelay: `${index * 50}ms` }}
@@ -331,14 +343,22 @@ export default function Dashboard() {
                   </CardHeader>
                 </Card>
               </Link>
-            ))}
+            ))
+            )}
           </div>
         </div>
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Content Creation Over Time */}
-          <Card className="border-0 bg-card/80 backdrop-blur-sm">
+          {loading ? (
+            <>
+              <ChartSkeleton />
+              <ChartSkeleton />
+            </>
+          ) : (
+            <>
+              {/* Content Creation Over Time */}
+              <Card className="border-0 bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-2xl">Content Creation Trend</CardTitle>
               <CardDescription>Last 7 days activity</CardDescription>
@@ -411,6 +431,8 @@ export default function Dashboard() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
+            </>
+          )}
         </div>
 
         {/* Recent Activity & Content */}
@@ -429,10 +451,7 @@ export default function Dashboard() {
             <CardContent>
               <ScrollArea className="h-[400px] pr-4">
                 {loading ? (
-                  <div className="text-center text-muted-foreground py-12">
-                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent mb-4"></div>
-                    <p>Loading...</p>
-                  </div>
+                  <ContentListSkeleton />
                 ) : recentContent.length === 0 ? (
                   <div className="text-center text-muted-foreground py-12">
                     <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />

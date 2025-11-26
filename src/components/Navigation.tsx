@@ -1,5 +1,5 @@
 import { NavLink } from "@/components/NavLink";
-import { Brain, Menu, Home, LayoutDashboard, FileText, Layout, Clock, BarChart, Calendar, CalendarRange, Archive, Globe, Shield } from "lucide-react";
+import { Brain, Menu, Home, LayoutDashboard, FileText, Layout, Clock, BarChart, Calendar, CalendarRange, Archive, Globe, Shield, Smartphone } from "lucide-react";
 import { useAdminCheck } from "@/hooks/use-admin-check";
 import {
   DropdownMenu,
@@ -121,6 +121,13 @@ export const Navigation = () => {
                   <Globe className="h-4 w-4" />
                   Web Scraper
                   <DropdownMenuShortcut>⌘⇧W</DropdownMenuShortcut>
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/native-features" className="w-full cursor-pointer flex items-center gap-2">
+                  <Smartphone className="h-4 w-4" />
+                  Native Features
+                  <DropdownMenuShortcut>⌘⇧N</DropdownMenuShortcut>
                 </NavLink>
               </DropdownMenuItem>
 

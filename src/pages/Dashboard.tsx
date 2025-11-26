@@ -16,8 +16,23 @@ import {
   Layout,
   BarChart
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format, subDays, startOfDay, endOfDay } from "date-fns";
 import { useNotifications } from "@/hooks/use-notifications";
+import {
+  LineChart,
+  Line,
+  BarChart as RechartsBarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 interface ContentStats {
   total: number;
@@ -25,6 +40,23 @@ interface ContentStats {
   published: number;
   draft: number;
 }
+
+interface ChartData {
+  date: string;
+  content: number;
+}
+
+interface PlatformData {
+  name: string;
+  value: number;
+}
+
+const COLORS = {
+  Twitter: "#1DA1F2",
+  LinkedIn: "#0A66C2",
+  Instagram: "#E4405F",
+  default: "#8884d8",
+};
 
 export default function Dashboard() {
   const [stats, setStats] = useState<ContentStats>({
@@ -34,6 +66,8 @@ export default function Dashboard() {
     draft: 0,
   });
   const [recentContent, setRecentContent] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [platformData, setPlatformData] = useState<PlatformData[]>([]);
   const [loading, setLoading] = useState(true);
   const { notifications } = useNotifications();
 
@@ -59,6 +93,45 @@ export default function Dashboard() {
 
       setStats({ total, scheduled, published, draft });
       setRecentContent(content?.slice(0, 5) || []);
+
+      // Prepare chart data for last 7 days
+      const last7Days = Array.from({ length: 7 }, (_, i) => {
+        const date = subDays(new Date(), 6 - i);
+        return {
+          date: format(date, "MMM dd"),
+          content: 0,
+        };
+      });
+
+      // Count content per day
+      content?.forEach((item) => {
+        const itemDate = new Date(item.created_at);
+        const dayIndex = last7Days.findIndex((day) => {
+          const checkDate = subDays(new Date(), 6 - last7Days.indexOf(day));
+          return (
+            startOfDay(itemDate).getTime() >= startOfDay(checkDate).getTime() &&
+            endOfDay(itemDate).getTime() <= endOfDay(checkDate).getTime()
+          );
+        });
+        if (dayIndex !== -1) {
+          last7Days[dayIndex].content += 1;
+        }
+      });
+
+      setChartData(last7Days);
+
+      // Prepare platform distribution data
+      const platformCounts: Record<string, number> = {};
+      content?.forEach((item) => {
+        platformCounts[item.platform] = (platformCounts[item.platform] || 0) + 1;
+      });
+
+      const platformArray = Object.entries(platformCounts).map(([name, value]) => ({
+        name,
+        value,
+      }));
+
+      setPlatformData(platformArray);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     } finally {
@@ -192,6 +265,69 @@ export default function Dashboard() {
               </Link>
             ))}
           </div>
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Content Creation Over Time */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Content Creation Trend</CardTitle>
+              <CardDescription>Last 7 days activity</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="content"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    name="Content Created"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Platform Distribution */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Platform Distribution</CardTitle>
+              <CardDescription>Content by platform</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={platformData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {platformData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[entry.name as keyof typeof COLORS] || COLORS.default}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Recent Activity & Content */}

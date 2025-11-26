@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, ArrowRight, Zap, Target, TrendingUp, Search, FolderOpen } from "lucide-react";
+import { Sparkles, ArrowRight, Zap, Target, TrendingUp, Search, FolderOpen, Twitter, Linkedin, Github, Mail, Book, HelpCircle } from "lucide-react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { ParallaxHero } from "@/components/ParallaxHero";
 
@@ -165,6 +165,93 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-border/50 bg-card/30 backdrop-blur-sm">
+        <div className="container mx-auto px-6 py-12">
+          <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            {/* Brand Section */}
+            <div className="space-y-4">
+              <h3 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                Brandon Hub
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                Your unified AI system for content creation, scheduling, and analytics.
+              </p>
+            </div>
+
+            {/* Product Links */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-foreground">Product</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link to="/content" className="hover:text-primary transition-colors">
+                    Content Generator
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/scraper" className="hover:text-primary transition-colors">
+                    Web Scraper
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/library" className="hover:text-primary transition-colors">
+                    Media Library
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/dashboard" className="hover:text-primary transition-colors">
+                    Analytics
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Resources Links */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-foreground">Resources</h4>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <a href="https://docs.lovable.dev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+                    <Book className="h-4 w-4" />
+                    Documentation
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:support@example.com" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+                    <HelpCircle className="h-4 w-4" />
+                    Support
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Social & Contact */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-foreground">Connect</h4>
+              <div className="flex gap-3">
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-muted hover:bg-primary hover:text-white transition-all flex items-center justify-center">
+                  <Twitter className="h-5 w-5" />
+                </a>
+                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-muted hover:bg-primary hover:text-white transition-all flex items-center justify-center">
+                  <Linkedin className="h-5 w-5" />
+                </a>
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-muted hover:bg-primary hover:text-white transition-all flex items-center justify-center">
+                  <Github className="h-5 w-5" />
+                </a>
+                <a href="mailto:contact@example.com" className="w-10 h-10 rounded-lg bg-muted hover:bg-primary hover:text-white transition-all flex items-center justify-center">
+                  <Mail className="h-5 w-5" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="border-t border-border/50 mt-8 pt-8 text-center text-sm text-muted-foreground">
+            <p>© {new Date().getFullYear()} Brandon Hub. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

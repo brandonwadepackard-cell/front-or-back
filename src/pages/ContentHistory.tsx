@@ -6,6 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,8 +20,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, Copy, Check, Download, Trash2 } from "lucide-react";
+import { Search, Copy, Check, Download, Trash2, CalendarIcon, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const ContentHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,6 +32,9 @@ const ContentHistory = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showBatchDelete, setShowBatchDelete] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState<string | null>(null);
+  const [newScheduledDate, setNewScheduledDate] = useState<Date>();
+  const [newScheduledTime, setNewScheduledTime] = useState("12:00");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -140,6 +149,59 @@ const ContentHistory = () => {
   const handleRegenerate = () => {
     if (selectedIds.length === 0) return;
     regenerateMutation.mutate(selectedIds);
+  };
+
+  const updateScheduleMutation = useMutation({
+    mutationFn: async ({ id, scheduledAt }: { id: string; scheduledAt: string | null }) => {
+      const { error } = await supabase
+        .from('content')
+        .update({ 
+          scheduled_at: scheduledAt,
+          status: scheduledAt ? 'scheduled' : 'draft'
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["content-history"] });
+      setEditingSchedule(null);
+      toast({
+        title: "Schedule updated",
+        description: "Content schedule has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update schedule",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleScheduleEdit = (id: string, currentSchedule: string | null) => {
+    setEditingSchedule(id);
+    if (currentSchedule) {
+      const date = new Date(currentSchedule);
+      setNewScheduledDate(date);
+      setNewScheduledTime(format(date, "HH:mm"));
+    } else {
+      setNewScheduledDate(undefined);
+      setNewScheduledTime("12:00");
+    }
+  };
+
+  const handleScheduleSave = (id: string) => {
+    if (!newScheduledDate) {
+      updateScheduleMutation.mutate({ id, scheduledAt: null });
+      return;
+    }
+
+    const [hours, minutes] = newScheduledTime.split(':');
+    const dateTime = new Date(newScheduledDate);
+    dateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    updateScheduleMutation.mutate({ id, scheduledAt: dateTime.toISOString() });
   };
 
   const copyToClipboard = async (text: string, id: string) => {
@@ -353,15 +415,23 @@ const ContentHistory = () => {
                           className="mt-1"
                         />
                         <div className="flex-1">
-                          <CardTitle className="flex items-center gap-2">
-                            <span>{getPlatformEmoji(item.platform)}</span>
-                            <span className="capitalize">{item.platform}</span>
-                          </CardTitle>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <CardTitle className="flex items-center gap-2">
+                              <span>{getPlatformEmoji(item.platform)}</span>
+                              <span className="capitalize">{item.platform}</span>
+                            </CardTitle>
+                            {item.status === 'scheduled' && item.scheduled_at && (
+                              <Badge variant="secondary">
+                                <Clock className="w-3 h-3 mr-1" />
+                                {format(new Date(item.scheduled_at), "MMM d, HH:mm")}
+                              </Badge>
+                            )}
+                          </div>
                           <CardDescription className="mt-1">
                             Topic: {item.topic}
                           </CardDescription>
                           <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(item.created_at).toLocaleString()}
+                            Created: {new Date(item.created_at).toLocaleString()}
                           </p>
                         </div>
                         <div className="flex gap-1">
@@ -379,6 +449,13 @@ const ContentHistory = () => {
                           <Button
                             variant="ghost"
                             size="sm"
+                            onClick={() => handleScheduleEdit(item.id, item.scheduled_at)}
+                          >
+                            <CalendarIcon className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => setDeleteId(item.id)}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
@@ -387,7 +464,61 @@ const ContentHistory = () => {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="whitespace-pre-wrap text-sm">{item.content}</p>
+                      <p className="whitespace-pre-wrap text-sm mb-4">{item.content}</p>
+                      
+                      {editingSchedule === item.id && (
+                        <div className="mt-4 p-4 border rounded-lg space-y-3 bg-muted/30">
+                          <Label>Update Schedule</Label>
+                          <div className="flex gap-2">
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "justify-start text-left font-normal flex-1",
+                                    !newScheduledDate && "text-muted-foreground"
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {newScheduledDate ? format(newScheduledDate, "PPP") : "Pick a date"}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                  mode="single"
+                                  selected={newScheduledDate}
+                                  onSelect={setNewScheduledDate}
+                                  disabled={(date) => date < new Date()}
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            
+                            <input
+                              type="time"
+                              value={newScheduledTime}
+                              onChange={(e) => setNewScheduledTime(e.target.value)}
+                              className="px-3 py-2 border rounded-md bg-background"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleScheduleSave(item.id)}
+                              disabled={updateScheduleMutation.isPending}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setEditingSchedule(null)}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 ))}

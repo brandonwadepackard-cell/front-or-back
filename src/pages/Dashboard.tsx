@@ -16,7 +16,8 @@ import {
   Layout,
   BarChart,
   Download,
-  FileDown
+  FileDown,
+  ArrowUpRight
 } from "lucide-react";
 import { formatDistanceToNow, format, subDays, startOfDay, endOfDay } from "date-fns";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -65,7 +66,7 @@ const COLORS = {
   Twitter: "#1DA1F2",
   LinkedIn: "#0A66C2",
   Instagram: "#E4405F",
-  default: "#8884d8",
+  default: "hsl(var(--primary))",
 };
 
 export default function Dashboard() {
@@ -89,7 +90,6 @@ export default function Dashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch content statistics
       const { data: content, error } = await supabase
         .from("content")
         .select("status, created_at, platform, topic, content, scheduled_at")
@@ -97,7 +97,6 @@ export default function Dashboard() {
 
       if (error) throw error;
 
-      // Calculate stats
       const total = content?.length || 0;
       const scheduled = content?.filter((c) => c.status === "scheduled").length || 0;
       const published = content?.filter((c) => c.status === "published").length || 0;
@@ -107,7 +106,6 @@ export default function Dashboard() {
       setRecentContent(content?.slice(0, 5) || []);
       setAllContent(content || []);
 
-      // Prepare chart data for last 7 days
       const last7Days = Array.from({ length: 7 }, (_, i) => {
         const date = subDays(new Date(), 6 - i);
         return {
@@ -116,7 +114,6 @@ export default function Dashboard() {
         };
       });
 
-      // Count content per day
       content?.forEach((item) => {
         const itemDate = new Date(item.created_at);
         const dayIndex = last7Days.findIndex((day) => {
@@ -133,7 +130,6 @@ export default function Dashboard() {
 
       setChartData(last7Days);
 
-      // Prepare platform distribution data
       const platformCounts: Record<string, number> = {};
       content?.forEach((item) => {
         platformCounts[item.platform] = (platformCounts[item.platform] || 0) + 1;
@@ -158,28 +154,32 @@ export default function Dashboard() {
       value: stats.total,
       icon: FileText,
       description: "All time content created",
-      color: "text-blue-500",
+      gradient: "from-blue-500 to-cyan-500",
+      bgColor: "bg-blue-500/10",
     },
     {
       title: "Scheduled",
       value: stats.scheduled,
       icon: Calendar,
       description: "Content ready to publish",
-      color: "text-orange-500",
+      gradient: "from-orange-500 to-amber-500",
+      bgColor: "bg-orange-500/10",
     },
     {
       title: "Published",
       value: stats.published,
       icon: CheckCircle2,
       description: "Successfully published",
-      color: "text-green-500",
+      gradient: "from-green-500 to-emerald-500",
+      bgColor: "bg-green-500/10",
     },
     {
       title: "Drafts",
       value: stats.draft,
       icon: Clock,
       description: "Work in progress",
-      color: "text-gray-500",
+      gradient: "from-purple-500 to-pink-500",
+      bgColor: "bg-purple-500/10",
     },
   ];
 
@@ -189,42 +189,38 @@ export default function Dashboard() {
       description: "Create new social media content",
       icon: Sparkles,
       link: "/content",
-      color: "bg-primary",
+      gradient: "from-purple-500 to-pink-500",
     },
     {
       title: "View Templates",
       description: "Browse saved templates",
       icon: Layout,
       link: "/templates",
-      color: "bg-secondary",
+      gradient: "from-blue-500 to-cyan-500",
     },
     {
       title: "Check Analytics",
       description: "View performance metrics",
       icon: BarChart,
       link: "/analytics",
-      color: "bg-accent",
+      gradient: "from-green-500 to-emerald-500",
     },
     {
       title: "Schedule Content",
       description: "Plan your content calendar",
       icon: Calendar,
       link: "/calendar",
-      color: "bg-muted",
+      gradient: "from-orange-500 to-amber-500",
     },
   ];
 
-  const getPlatformColor = (platform: string) => {
-    switch (platform.toLowerCase()) {
-      case "twitter":
-        return "bg-blue-500";
-      case "linkedin":
-        return "bg-blue-700";
-      case "instagram":
-        return "bg-pink-500";
-      default:
-      return "bg-gray-500";
-    }
+  const getPlatformBadge = (platform: string) => {
+    const styles: Record<string, string> = {
+      twitter: "bg-blue-500 text-white border-0",
+      linkedin: "bg-blue-700 text-white border-0",
+      instagram: "bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0",
+    };
+    return styles[platform.toLowerCase()] || "bg-muted";
   };
 
   const handleExport = (format: "csv" | "pdf") => {
@@ -244,26 +240,27 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-6 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-background">
+      <div className="container mx-auto px-6 py-12 space-y-8">
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
-            <p className="text-muted-foreground">
+        <div className="flex items-start justify-between animate-fade-in">
+          <div className="space-y-2">
+            <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              Dashboard
+            </h1>
+            <p className="text-muted-foreground text-lg">
               Welcome back! Here's what's happening with your content.
             </p>
           </div>
           
-          {/* Export Button */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2">
                 <Download className="h-4 w-4" />
-                Export
+                Export Data
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => handleExport("csv")} className="gap-2">
                 <FileDown className="h-4 w-4" />
                 Export as CSV
@@ -277,20 +274,29 @@ export default function Dashboard() {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {statCards.map((stat) => (
-            <Card key={stat.title}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.title}
-                </CardTitle>
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-slide-up">
+          {statCards.map((stat, index) => (
+            <Card 
+              key={stat.title} 
+              className="overflow-hidden hover:-translate-y-1 transition-all duration-300 bg-card/80 backdrop-blur-sm border-0"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className={`p-3 rounded-xl ${stat.bgColor}`}>
+                    <stat.icon className={`h-6 w-6 bg-gradient-to-br ${stat.gradient} bg-clip-text text-transparent`} style={{ WebkitTextFillColor: 'transparent', backgroundClip: 'text' }} />
+                  </div>
+                  <ArrowUpRight className="h-4 w-4 text-green-500" />
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
+              <CardContent className="space-y-2">
+                <div className={`text-4xl font-bold bg-gradient-to-br ${stat.gradient} bg-clip-text text-transparent`}>
                   {loading ? "..." : stat.value}
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-sm font-medium text-foreground">
+                  {stat.title}
+                </p>
+                <p className="text-xs text-muted-foreground">
                   {stat.description}
                 </p>
               </CardContent>
@@ -299,18 +305,27 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {quickActions.map((action) => (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-bold">Quick Actions</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {quickActions.map((action, index) => (
               <Link key={action.title} to={action.link}>
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                  <CardHeader>
-                    <div className={`w-12 h-12 rounded-lg ${action.color} flex items-center justify-center mb-3`}>
-                      <action.icon className="h-6 w-6 text-background" />
+                <Card className="group hover:-translate-y-2 transition-all duration-300 cursor-pointer h-full border-0 bg-card/80 backdrop-blur-sm overflow-hidden animate-slide-up"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <div className={`h-1 bg-gradient-to-r ${action.gradient}`} />
+                  <CardHeader className="pb-3">
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${action.gradient} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-lg`}>
+                      <action.icon className="h-7 w-7 text-white" />
                     </div>
-                    <CardTitle className="text-lg">{action.title}</CardTitle>
-                    <CardDescription>{action.description}</CardDescription>
+                    <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                      {action.title}
+                    </CardTitle>
+                    <CardDescription className="text-sm">
+                      {action.description}
+                    </CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
@@ -319,27 +334,35 @@ export default function Dashboard() {
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Content Creation Over Time */}
-          <Card>
+          <Card className="border-0 bg-card/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>Content Creation Trend</CardTitle>
+              <CardTitle className="text-2xl">Content Creation Trend</CardTitle>
               <CardDescription>Last 7 days activity</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis allowDecimals={false} />
-                  <Tooltip />
-                  <Legend />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
+                  <YAxis allowDecimals={false} stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      background: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                    }}
+                  />
                   <Line
                     type="monotone"
                     dataKey="content"
                     stroke="hsl(var(--primary))"
-                    strokeWidth={2}
+                    strokeWidth={3}
                     name="Content Created"
+                    dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 5 }}
+                    activeDot={{ r: 7 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -347,9 +370,9 @@ export default function Dashboard() {
           </Card>
 
           {/* Platform Distribution */}
-          <Card>
+          <Card className="border-0 bg-card/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>Platform Distribution</CardTitle>
+              <CardTitle className="text-2xl">Platform Distribution</CardTitle>
               <CardDescription>Content by platform</CardDescription>
             </CardHeader>
             <CardContent>
@@ -363,7 +386,7 @@ export default function Dashboard() {
                     label={({ name, percent }) =>
                       `${name} ${(percent * 100).toFixed(0)}%`
                     }
-                    outerRadius={80}
+                    outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -374,7 +397,14 @@ export default function Dashboard() {
                       />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip
+                    contentStyle={{ 
+                      background: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
@@ -384,10 +414,10 @@ export default function Dashboard() {
         {/* Recent Activity & Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Content */}
-          <Card>
+          <Card className="border-0 bg-card/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-2xl">
+                <TrendingUp className="h-6 w-6" />
                 Recent Content
               </CardTitle>
               <CardDescription>
@@ -397,37 +427,37 @@ export default function Dashboard() {
             <CardContent>
               <ScrollArea className="h-[400px] pr-4">
                 {loading ? (
-                  <div className="text-center text-muted-foreground py-8">
-                    Loading...
+                  <div className="text-center text-muted-foreground py-12">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent mb-4"></div>
+                    <p>Loading...</p>
                   </div>
                 ) : recentContent.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-8">
-                    <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>No content yet</p>
+                  <div className="text-center text-muted-foreground py-12">
+                    <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg mb-2">No content yet</p>
+                    <p className="text-sm mb-4">Start creating your first piece of content</p>
                     <Link to="/content">
-                      <Button className="mt-4" size="sm">
+                      <Button className="shadow-lg">
                         <Plus className="h-4 w-4 mr-2" />
                         Create Content
                       </Button>
                     </Link>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {recentContent.map((item) => (
                       <div
                         key={item.id}
-                        className="border rounded-lg p-4 hover:bg-accent/50 transition-colors"
+                        className="border border-border/50 rounded-xl p-4 hover:bg-accent/50 hover:border-primary/50 transition-all duration-200"
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <Badge
-                            className={`${getPlatformColor(item.platform)} text-white`}
-                          >
+                        <div className="flex items-start justify-between mb-3">
+                          <Badge className={getPlatformBadge(item.platform)}>
                             {item.platform}
                           </Badge>
-                          <Badge variant="outline">{item.status}</Badge>
+                          <Badge variant="outline" className="capitalize">{item.status}</Badge>
                         </div>
-                        <h4 className="font-medium mb-1">{item.topic}</h4>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                        <h4 className="font-semibold mb-2 text-base">{item.topic}</h4>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                           {item.content}
                         </p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -455,10 +485,10 @@ export default function Dashboard() {
           </Card>
 
           {/* Recent Activity */}
-          <Card>
+          <Card className="border-0 bg-card/80 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-2xl">
+                <Clock className="h-6 w-6" />
                 Recent Activity
               </CardTitle>
               <CardDescription>
@@ -468,21 +498,21 @@ export default function Dashboard() {
             <CardContent>
               <ScrollArea className="h-[400px] pr-4">
                 {notifications.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-8">
-                    <Clock className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>No recent activity</p>
+                  <div className="text-center text-muted-foreground py-12">
+                    <Clock className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg">No recent activity</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {notifications.slice(0, 10).map((notification) => (
                       <div
                         key={notification.id}
-                        className={`border rounded-lg p-4 ${
-                          !notification.is_read ? "bg-accent/30" : ""
+                        className={`border border-border/50 rounded-xl p-4 transition-all duration-200 ${
+                          !notification.is_read ? "bg-accent/30 border-primary/30" : "hover:bg-accent/50"
                         }`}
                       >
                         <div className="flex items-start gap-3">
-                          <span className="text-2xl">
+                          <span className="text-2xl flex-shrink-0">
                             {notification.type === "success"
                               ? "✅"
                               : notification.type === "warning"
@@ -491,11 +521,11 @@ export default function Dashboard() {
                               ? "❌"
                               : "ℹ️"}
                           </span>
-                          <div className="flex-1">
-                            <h4 className="font-medium mb-1">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold mb-1 text-sm">
                               {notification.title}
                             </h4>
-                            <p className="text-sm text-muted-foreground mb-2">
+                            <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
                               {notification.message}
                             </p>
                             <p className="text-xs text-muted-foreground">

@@ -18,15 +18,17 @@ export const Navigation = () => {
   useKeyboardShortcuts();
   
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="border-b bg-card/80 backdrop-blur-lg supports-[backdrop-filter]:bg-card/60 sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <NavLink to="/" className="flex items-center gap-2 text-xl font-bold">
-            <Brain className="w-6 h-6 text-primary" />
-            <span>Brandon Hub</span>
+          <NavLink to="/" className="flex items-center gap-3 text-xl font-bold group">
+            <div className="p-2 rounded-xl bg-gradient-primary">
+              <Brain className="w-5 h-5 text-white" />
+            </div>
+            <span className="bg-gradient-primary bg-clip-text text-transparent">Brandon Hub</span>
           </NavLink>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <NotificationCenter />
             <ThemeToggle />
             <DropdownMenu>
@@ -36,7 +38,7 @@ export const Navigation = () => {
                 Menu
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 bg-background z-50">
+            <DropdownMenuContent align="end" className="w-64 bg-card border-border z-50">
               <DropdownMenuItem asChild>
                 <NavLink to="/" end className="w-full cursor-pointer flex items-center gap-2">
                   <Home className="h-4 w-4" />

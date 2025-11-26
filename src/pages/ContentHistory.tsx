@@ -20,7 +20,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, Copy, Check, Download, Trash2, CalendarIcon, Clock } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import { Search, Copy, Check, Download, Trash2, CalendarIcon, Clock, Edit, MoreVertical, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -149,6 +157,68 @@ const ContentHistory = () => {
   const handleRegenerate = () => {
     if (selectedIds.length === 0) return;
     regenerateMutation.mutate(selectedIds);
+  };
+
+  const bulkStatusMutation = useMutation({
+    mutationFn: async ({ ids, status }: { ids: string[]; status: string }) => {
+      const { error } = await supabase
+        .from("content")
+        .update({ status })
+        .in("id", ids);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, { ids, status }) => {
+      queryClient.invalidateQueries({ queryKey: ["content-history"] });
+      toast({
+        title: "Status Updated",
+        description: `${ids.length} item${ids.length > 1 ? 's' : ''} set to ${status}`,
+      });
+      setSelectedIds([]);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update status",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const bulkPlatformMutation = useMutation({
+    mutationFn: async ({ ids, platform }: { ids: string[]; platform: string }) => {
+      const { error } = await supabase
+        .from("content")
+        .update({ platform })
+        .in("id", ids);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, { ids, platform }) => {
+      queryClient.invalidateQueries({ queryKey: ["content-history"] });
+      toast({
+        title: "Platform Updated",
+        description: `${ids.length} item${ids.length > 1 ? 's' : ''} moved to ${platform}`,
+      });
+      setSelectedIds([]);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update platform",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleBulkStatusChange = (status: string) => {
+    if (selectedIds.length === 0) return;
+    bulkStatusMutation.mutate({ ids: selectedIds, status });
+  };
+
+  const handleBulkPlatformChange = (platform: string) => {
+    if (selectedIds.length === 0) return;
+    bulkPlatformMutation.mutate({ ids: selectedIds, platform });
   };
 
   const updateScheduleMutation = useMutation({
@@ -315,36 +385,10 @@ const ContentHistory = () => {
                   <CardTitle>Filters</CardTitle>
                   <CardDescription>Search and filter your content</CardDescription>
                 </div>
-                <div className="flex gap-2">
-                  {selectedIds.length > 0 && (
-                    <>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={handleRegenerate}
-                        disabled={regenerateMutation.isPending}
-                      >
-                        {regenerateMutation.isPending ? "Regenerating..." : `Regenerate (${selectedIds.length})`}
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={handleBatchDelete}>
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete ({selectedIds.length})
-                      </Button>
-                    </>
-                  )}
-                  <Button variant="outline" size="sm" onClick={exportToCSV}>
-                    <Download className="h-4 w-4 mr-2" />
-                    CSV {selectedIds.length > 0 && `(${selectedIds.length})`}
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={exportToJSON}>
-                    <Download className="h-4 w-4 mr-2" />
-                    JSON {selectedIds.length > 0 && `(${selectedIds.length})`}
-                  </Button>
-                </div>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex flex-col md:flex-row gap-4 mb-4">
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -377,6 +421,93 @@ const ContentHistory = () => {
                   </Button>
                 )}
               </div>
+
+              {/* Bulk Actions Toolbar */}
+              {selectedIds.length > 0 && (
+                <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <p className="text-sm font-medium">
+                      {selectedIds.length} item{selectedIds.length > 1 ? 's' : ''} selected
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {/* Change Status */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Edit className="h-4 w-4 mr-2" />
+                            Change Status
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuLabel>Set Status</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleBulkStatusChange("draft")}>
+                            Draft
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleBulkStatusChange("scheduled")}>
+                            Scheduled
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleBulkStatusChange("published")}>
+                            Published
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      {/* Change Platform */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <MoreVertical className="h-4 w-4 mr-2" />
+                            Change Platform
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuLabel>Move to Platform</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleBulkPlatformChange("twitter")}>
+                            Twitter
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleBulkPlatformChange("linkedin")}>
+                            LinkedIn
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleBulkPlatformChange("instagram")}>
+                            Instagram
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleRegenerate}
+                        disabled={regenerateMutation.isPending}
+                      >
+                        <RefreshCw className={cn("h-4 w-4 mr-2", regenerateMutation.isPending && "animate-spin")} />
+                        {regenerateMutation.isPending ? "Regenerating..." : "Regenerate"}
+                      </Button>
+
+                      <Button variant="outline" size="sm" onClick={exportToCSV}>
+                        <Download className="h-4 w-4 mr-2" />
+                        CSV
+                      </Button>
+
+                      <Button variant="outline" size="sm" onClick={exportToJSON}>
+                        <Download className="h-4 w-4 mr-2" />
+                        JSON
+                      </Button>
+
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={handleBatchDelete}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -420,6 +551,17 @@ const ContentHistory = () => {
                               <span>{getPlatformEmoji(item.platform)}</span>
                               <span className="capitalize">{item.platform}</span>
                             </CardTitle>
+                            {/* Status Badge */}
+                            <Badge 
+                              variant={
+                                item.status === 'published' ? 'default' :
+                                item.status === 'scheduled' ? 'secondary' :
+                                'outline'
+                              }
+                              className="capitalize"
+                            >
+                              {item.status}
+                            </Badge>
                             {item.status === 'scheduled' && item.scheduled_at && (
                               <Badge variant="secondary">
                                 <Clock className="w-3 h-3 mr-1" />

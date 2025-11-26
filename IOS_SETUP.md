@@ -57,7 +57,47 @@ Add these entries inside the `<dict>` tag:
 5. Create an APNs key or certificate
 6. Configure your backend with the APNs credentials
 
-## 3. App Icons
+## 3. Deep Linking Setup
+
+Deep linking allows URLs to open specific sections of your app.
+
+### Configure Custom URL Scheme (Info.plist):
+
+Add this to `ios/App/App/Info.plist` inside the `<dict>` tag:
+
+```xml
+<!-- Deep Linking - Custom URL Scheme -->
+<key>CFBundleURLTypes</key>
+<array>
+  <dict>
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>brandonhub</string>
+    </array>
+    <key>CFBundleURLName</key>
+    <string>app.lovable.brandonhub</string>
+  </dict>
+</array>
+```
+
+This allows links like `brandonhub://dashboard` to open your app.
+
+### Configure Universal Links (Optional):
+
+For universal links (https://yourdomain.com/path):
+
+1. In Xcode:
+   - Select your app target
+   - Go to "Signing & Capabilities"
+   - Click "+ Capability"
+   - Add "Associated Domains"
+   - Add: `applinks:yourdomain.com`
+
+2. Host a verification file at `https://yourdomain.com/.well-known/apple-app-site-association`
+
+See `DEEP_LINKING_SETUP.md` for complete universal links configuration.
+
+## 4. App Icons
 
 A 1024x1024 master app icon has been generated at `public/ios-icons/Icon-1024.png`.
 
@@ -95,7 +135,7 @@ You need to create multiple icon sizes for iOS. Use one of these free tools:
 3. Select `AppIcon`
 4. Drag and drop each icon file to its corresponding size slot
 
-## 4. App Display Name
+## 5. App Display Name
 
 To set your app's display name on the iOS home screen:
 
@@ -106,14 +146,14 @@ To set your app's display name on the iOS home screen:
 <string>Brandon Hub</string>
 ```
 
-## 5. Launch Screen (Splash Screen)
+## 6. Launch Screen (Splash Screen)
 
 Your launch screen is configured at:
 `ios/App/App/Base.lproj/LaunchScreen.storyboard`
 
 You can customize it using Xcode's Interface Builder or replace it with your own design.
 
-## 6. Build and Run
+## 7. Build and Run
 
 After all configurations:
 
@@ -132,7 +172,7 @@ npx cap open ios
 # 2. Click the Play button (or Cmd+R) to build and run
 ```
 
-## 7. Testing Native Features
+## 8. Testing Native Features
 
 Once running on a device or simulator:
 - Navigate to Tools → Native Features

@@ -270,7 +270,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      find_similar_library_items: {
+        Args: {
+          exclude_id?: string
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          created_at: string
+          description: string
+          id: string
+          similarity: number
+          storage_path: string
+          thumbnail_path: string
+          title: string
+          type: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

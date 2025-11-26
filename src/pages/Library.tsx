@@ -9,9 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Upload, FileText, Link as LinkIcon, Video, Image as ImageIcon, Mic, X, Tag, FolderTree } from "lucide-react";
+import { Plus, Upload, FileText, Link as LinkIcon, Video, Image as ImageIcon, Mic, X, Tag, FolderTree, Sparkles } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SimilarContentDialog } from "@/components/SimilarContentDialog";
 
 type LibraryItemType = 'video' | 'photo' | 'text_idea' | 'link' | 'voice_memo';
 
@@ -39,6 +40,8 @@ const Library = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
+  const [similarDialogOpen, setSimilarDialogOpen] = useState(false);
+  const [selectedItemForSimilar, setSelectedItemForSimilar] = useState<{ id: string; title: string } | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -176,6 +179,21 @@ const Library = () => {
           } else {
             toast.success('Thumbnail generated!');
             queryClient.invalidateQueries({ queryKey: ['library-items'] });
+          }
+        });
+      }
+
+      // Generate embedding for similarity search
+      const embeddingText = `${item.title} ${item.description || ''} ${item.content || ''}`.trim();
+      if (embeddingText) {
+        supabase.functions.invoke('generate-embedding', {
+          body: {
+            itemId: libraryItem.id,
+            text: embeddingText
+          }
+        }).then(({ error }) => {
+          if (error) {
+            console.error('Embedding generation error:', error);
           }
         });
       }
@@ -727,7 +745,7 @@ const Library = () => {
                     {item.content}
                   </a>
                 )}
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1 mb-3">
                   {item.library_item_tags?.map((t: any) => t.tags && (
                     <Badge key={t.tags.id} variant="secondary" className="text-xs">
                       <Tag className="h-3 w-3 mr-1" />
@@ -741,10 +759,31 @@ const Library = () => {
                     </Badge>
                   ))}
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    setSelectedItemForSimilar({ id: item.id, title: item.title });
+                    setSimilarDialogOpen(true);
+                  }}
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Find Similar Content
+                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
+      )}
+
+      {selectedItemForSimilar && (
+        <SimilarContentDialog
+          itemId={selectedItemForSimilar.id}
+          itemTitle={selectedItemForSimilar.title}
+          open={similarDialogOpen}
+          onOpenChange={setSimilarDialogOpen}
+        />
       )}
     </div>
   );

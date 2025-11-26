@@ -6,9 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Sparkles, Copy, Check, CalendarIcon } from "lucide-react";
+import { Loader2, Sparkles, Copy, Check, CalendarIcon, Repeat } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
@@ -22,6 +24,10 @@ export default function ContentGenerator() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [scheduledDate, setScheduledDate] = useState<Date>();
   const [scheduledTime, setScheduledTime] = useState("12:00");
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceType, setRecurrenceType] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+  const [recurrenceInterval, setRecurrenceInterval] = useState(1);
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date>();
   const { toast } = useToast();
 
   // Update form when URL params change (from templates)
@@ -65,7 +71,11 @@ export default function ContentGenerator() {
           platform,
           content,
           status,
-          scheduled_at: scheduledAt
+          scheduled_at: scheduledAt,
+          is_recurring: isRecurring && status === 'scheduled',
+          recurrence_type: isRecurring && status === 'scheduled' ? recurrenceType : null,
+          recurrence_interval: isRecurring && status === 'scheduled' ? recurrenceInterval : 1,
+          recurrence_end_date: isRecurring && status === 'scheduled' && recurrenceEndDate ? recurrenceEndDate.toISOString() : null,
         }]);
 
       if (error) throw error;
@@ -75,11 +85,15 @@ export default function ContentGenerator() {
       toast({
         title: status === 'scheduled' ? "Content scheduled!" : "Content saved!",
         description: status === 'scheduled' 
-          ? `Content will be published on ${format(scheduledDate!, "PPP 'at' p")}`
+          ? isRecurring
+            ? `Recurring content set up successfully`
+            : `Content will be published on ${format(scheduledDate!, "PPP 'at' p")}`
           : "Content saved as draft",
       });
       setTopic("");
       setScheduledDate(undefined);
+      setIsRecurring(false);
+      setRecurrenceEndDate(undefined);
     },
     onError: (error: any) => {
       toast({
@@ -249,6 +263,106 @@ export default function ContentGenerator() {
                 />
               </div>
             </div>
+
+            {scheduledDate && (
+              <div className="space-y-4 border-t pt-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="flex items-center gap-2">
+                      <Repeat className="h-4 w-4" />
+                      Recurring Schedule
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Automatically create content at regular intervals
+                    </p>
+                  </div>
+                  <Switch
+                    checked={isRecurring}
+                    onCheckedChange={setIsRecurring}
+                    disabled={isGenerating}
+                  />
+                </div>
+
+                {isRecurring && (
+                  <div className="space-y-4 pl-6 border-l-2 border-muted">
+                    <div className="space-y-2">
+                      <Label>Repeat Every</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          min="1"
+                          value={recurrenceInterval}
+                          onChange={(e) => setRecurrenceInterval(parseInt(e.target.value) || 1)}
+                          className="w-20"
+                          disabled={isGenerating}
+                        />
+                        <Select 
+                          value={recurrenceType} 
+                          onValueChange={(value: 'daily' | 'weekly' | 'monthly') => setRecurrenceType(value)}
+                          disabled={isGenerating}
+                        >
+                          <SelectTrigger className="flex-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="daily">Day(s)</SelectItem>
+                            <SelectItem value="weekly">Week(s)</SelectItem>
+                            <SelectItem value="monthly">Month(s)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>End Date (Optional)</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "justify-start text-left font-normal w-full",
+                              !recurrenceEndDate && "text-muted-foreground"
+                            )}
+                            disabled={isGenerating}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {recurrenceEndDate ? format(recurrenceEndDate, "PPP") : "Never ends"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={recurrenceEndDate}
+                            onSelect={setRecurrenceEndDate}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      {recurrenceEndDate && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setRecurrenceEndDate(undefined)}
+                          className="w-full"
+                          disabled={isGenerating}
+                        >
+                          Clear end date
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="bg-muted/50 p-3 rounded-md text-sm">
+                      <p className="font-medium mb-1">Summary:</p>
+                      <p className="text-muted-foreground">
+                        Content will be created every {recurrenceInterval} {recurrenceType}
+                        {recurrenceEndDate ? ` until ${format(recurrenceEndDate, "PPP")}` : ' indefinitely'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <Button
               onClick={handleGenerate} 

@@ -1,10 +1,37 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { useHaptics } from "@/hooks/use-haptics";
 
-const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("rounded-2xl border-0 bg-card text-card-foreground shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 ease-out", className)} {...props} />
-));
+const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, onClick, onMouseDown, ...props }, ref) => {
+    const { triggerHaptic } = useHaptics();
+    
+    const handleInteraction = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (onClick || onMouseDown) {
+        triggerHaptic('light');
+      }
+      onClick?.(e);
+    };
+    
+    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (onMouseDown) {
+        triggerHaptic('light');
+      }
+      onMouseDown?.(e);
+    };
+    
+    return (
+      <div 
+        ref={ref} 
+        className={cn("rounded-2xl border-0 bg-card text-card-foreground shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 ease-out", className)} 
+        onClick={handleInteraction}
+        onMouseDown={handleMouseDown}
+        {...props} 
+      />
+    );
+  }
+);
 Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(

@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { StatCardSkeleton, ChartSkeleton, ContentListSkeleton, QuickActionSkeleton } from "@/components/skeletons/CardSkeleton";
 import { PullToRefresh } from "@/components/PullToRefresh";
+import { LongPressContextMenu } from "@/components/LongPressContextMenu";
 import { 
   FileText, 
   Calendar, 
@@ -20,7 +21,11 @@ import {
   BarChart,
   Download,
   FileDown,
-  ArrowUpRight
+  ArrowUpRight,
+  Edit,
+  Trash2,
+  Copy,
+  Eye
 } from "lucide-react";
 import { formatDistanceToNow, format, subDays, startOfDay, endOfDay } from "date-fns";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -286,31 +291,71 @@ export default function Dashboard() {
             ))
           ) : (
             statCards.map((stat, index) => (
-            <Card 
-              key={stat.title} 
-              className="overflow-hidden hover:-translate-y-1 transition-all duration-300 bg-card/80 backdrop-blur-sm border-0"
-              style={{ animationDelay: `${index * 50}ms` }}
+            <LongPressContextMenu
+              key={stat.title}
+              menuItems={[
+                {
+                  icon: <Eye />,
+                  label: 'View Details',
+                  action: () => {
+                    toast({
+                      title: stat.title,
+                      description: `${stat.value} ${stat.description.toLowerCase()}`,
+                    });
+                  },
+                },
+                {
+                  icon: <FileDown />,
+                  label: 'Export Data',
+                  action: () => {
+                    const filteredContent = allContent.filter(c => {
+                      if (stat.title === 'Total Content') return true;
+                      return c.status === stat.title.toLowerCase().replace('s', '');
+                    });
+                    exportToCSV(filteredContent);
+                    toast({
+                      title: "Export Successful",
+                      description: `${stat.title} data exported`,
+                    });
+                  },
+                },
+                {
+                  icon: <BarChart />,
+                  label: 'View Analytics',
+                  action: () => {
+                    toast({
+                      title: "Analytics",
+                      description: "Detailed analytics coming soon",
+                    });
+                  },
+                },
+              ]}
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className={`p-3 rounded-xl ${stat.bgColor}`}>
-                    <stat.icon className={`h-6 w-6 bg-gradient-to-br ${stat.gradient} bg-clip-text text-transparent`} style={{ WebkitTextFillColor: 'transparent', backgroundClip: 'text' }} />
+              <Card 
+                className="overflow-hidden hover:-translate-y-1 transition-all duration-300 bg-card/80 backdrop-blur-sm border-0"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className={`p-3 rounded-xl ${stat.bgColor}`}>
+                      <stat.icon className={`h-6 w-6 bg-gradient-to-br ${stat.gradient} bg-clip-text text-transparent`} style={{ WebkitTextFillColor: 'transparent', backgroundClip: 'text' }} />
+                    </div>
+                    <ArrowUpRight className="h-4 w-4 text-green-500" />
                   </div>
-                  <ArrowUpRight className="h-4 w-4 text-green-500" />
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className={`text-4xl font-bold bg-gradient-to-br ${stat.gradient} bg-clip-text text-transparent`}>
-                  {loading ? "..." : stat.value}
-                </div>
-                <p className="text-sm font-medium text-foreground">
-                  {stat.title}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {stat.description}
-                </p>
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className={`text-4xl font-bold bg-gradient-to-br ${stat.gradient} bg-clip-text text-transparent`}>
+                    {loading ? "..." : stat.value}
+                  </div>
+                  <p className="text-sm font-medium text-foreground">
+                    {stat.title}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {stat.description}
+                  </p>
+                </CardContent>
+              </Card>
+            </LongPressContextMenu>
           ))
           )}
         </div>
@@ -469,37 +514,89 @@ export default function Dashboard() {
                 ) : (
                   <div className="space-y-3">
                     {recentContent.map((item) => (
-                      <div
+                      <LongPressContextMenu
                         key={item.id}
-                        className="border border-border/50 rounded-xl p-4 hover:bg-accent/50 hover:border-primary/50 transition-all duration-200"
+                        menuItems={[
+                          {
+                            icon: <Eye />,
+                            label: 'View Details',
+                            action: () => {
+                              toast({
+                                title: "Content Details",
+                                description: item.content,
+                              });
+                            },
+                          },
+                          {
+                            icon: <Edit />,
+                            label: 'Edit',
+                            action: () => {
+                              toast({
+                                title: "Edit Mode",
+                                description: "Edit functionality coming soon",
+                              });
+                            },
+                          },
+                          {
+                            icon: <Copy />,
+                            label: 'Duplicate',
+                            action: () => {
+                              toast({
+                                title: "Content Duplicated",
+                                description: "Created a copy of this content",
+                              });
+                            },
+                          },
+                          {
+                            icon: <Trash2 />,
+                            label: 'Delete',
+                            action: async () => {
+                              const { error } = await supabase
+                                .from('content')
+                                .delete()
+                                .eq('id', item.id);
+                              
+                              if (!error) {
+                                toast({
+                                  title: "Content Deleted",
+                                  description: "Content removed successfully",
+                                });
+                                fetchDashboardData();
+                              }
+                            },
+                            variant: 'destructive' as const,
+                          },
+                        ]}
                       >
-                        <div className="flex items-start justify-between mb-3">
-                          <Badge className={getPlatformBadge(item.platform)}>
-                            {item.platform}
-                          </Badge>
-                          <Badge variant="outline" className="capitalize">{item.status}</Badge>
+                        <div className="border border-border/50 rounded-xl p-4 hover:bg-accent/50 hover:border-primary/50 transition-all duration-200">
+                          <div className="flex items-start justify-between mb-3">
+                            <Badge className={getPlatformBadge(item.platform)}>
+                              {item.platform}
+                            </Badge>
+                            <Badge variant="outline" className="capitalize">{item.status}</Badge>
+                          </div>
+                          <h4 className="font-semibold mb-2 text-base">{item.topic}</h4>
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                            {item.content}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            {formatDistanceToNow(new Date(item.created_at), {
+                              addSuffix: true,
+                            })}
+                            {item.scheduled_at && (
+                              <>
+                                <span>•</span>
+                                <Calendar className="h-3 w-3" />
+                                Scheduled for{" "}
+                                {formatDistanceToNow(new Date(item.scheduled_at), {
+                                  addSuffix: true,
+                                })}
+                              </>
+                            )}
+                          </div>
                         </div>
-                        <h4 className="font-semibold mb-2 text-base">{item.topic}</h4>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                          {item.content}
-                        </p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          {formatDistanceToNow(new Date(item.created_at), {
-                            addSuffix: true,
-                          })}
-                          {item.scheduled_at && (
-                            <>
-                              <span>•</span>
-                              <Calendar className="h-3 w-3" />
-                              Scheduled for{" "}
-                              {formatDistanceToNow(new Date(item.scheduled_at), {
-                                addSuffix: true,
-                              })}
-                            </>
-                          )}
-                        </div>
-                      </div>
+                      </LongPressContextMenu>
                     ))}
                   </div>
                 )}

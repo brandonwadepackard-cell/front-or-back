@@ -57,6 +57,16 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        platform: {
+          twitter: "hsl(var(--platform-twitter))",
+          "twitter-foreground": "hsl(var(--platform-twitter-foreground))",
+          linkedin: "hsl(var(--platform-linkedin))",
+          "linkedin-foreground": "hsl(var(--platform-linkedin-foreground))",
+          instagram: "hsl(var(--platform-instagram))",
+          "instagram-foreground": "hsl(var(--platform-instagram-foreground))",
+          all: "hsl(var(--platform-all))",
+          "all-foreground": "hsl(var(--platform-all-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

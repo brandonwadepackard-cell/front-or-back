@@ -53,6 +53,16 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Platform colors for calendar */
+    --platform-twitter: 203 89% 53%;
+    --platform-twitter-foreground: 0 0% 100%;
+    --platform-linkedin: 201 100% 35%;
+    --platform-linkedin-foreground: 0 0% 100%;
+    --platform-instagram: 326 100% 52%;
+    --platform-instagram-foreground: 0 0% 100%;
+    --platform-all: 142 71% 45%;
+    --platform-all-foreground: 0 0% 100%;
   }
 
   .dark {
@@ -91,6 +101,16 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Platform colors for calendar - dark mode */
+    --platform-twitter: 203 89% 53%;
+    --platform-twitter-foreground: 0 0% 100%;
+    --platform-linkedin: 201 100% 42%;
+    --platform-linkedin-foreground: 0 0% 100%;
+    --platform-instagram: 326 100% 58%;
+    --platform-instagram-foreground: 0 0% 100%;
+    --platform-all: 142 71% 50%;
+    --platform-all-foreground: 0 0% 100%;
   }
 }
 

@@ -8,6 +8,7 @@ import { Navigation } from "@/components/Navigation";
 import { AICopilot } from "@/components/AICopilot";
 import { PageTransition } from "@/components/PageTransition";
 import { SwipeNavigation } from "@/components/SwipeNavigation";
+import { useDeepLinks } from "@/hooks/use-deep-links";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import ContentGenerator from "./pages/ContentGenerator";
@@ -21,12 +22,14 @@ import Scraper from "./pages/Scraper";
 import ScraperResults from "./pages/ScraperResults";
 import AdminDashboard from "./pages/AdminDashboard";
 import NativeFeatures from "./pages/NativeFeatures";
+import DeepLinking from "./pages/DeepLinking";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const AnimatedRoutes = () => {
   const location = useLocation();
+  useDeepLinks(); // Initialize deep link handling
 
   return (
     <SwipeNavigation>
@@ -45,6 +48,7 @@ const AnimatedRoutes = () => {
           <Route path="/scraper/:jobId" element={<PageTransition><ScraperResults /></PageTransition>} />
           <Route path="/admin" element={<PageTransition><AdminDashboard /></PageTransition>} />
           <Route path="/native-features" element={<PageTransition><NativeFeatures /></PageTransition>} />
+          <Route path="/deep-linking" element={<PageTransition><DeepLinking /></PageTransition>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>

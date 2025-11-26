@@ -7,7 +7,13 @@ const config: CapacitorConfig = {
   server: {
     url: 'https://87e65127-201b-4600-9f3b-696ed9371fac.lovableproject.com?forceHideBadge=true',
     cleartext: true
-  }
+  },
+  plugins: {
+    App: {
+      // Custom URL scheme for deep linking
+      scheme: 'brandonhub',
+    },
+  },
 };
 
 export default config;

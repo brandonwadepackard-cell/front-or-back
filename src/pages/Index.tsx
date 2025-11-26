@@ -2,16 +2,13 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Brain, ArrowRight, Zap, Target, TrendingUp, Lock } from "lucide-react";
+import { Sparkles, Brain, ArrowRight, Zap, Target, TrendingUp } from "lucide-react";
+import { AnimatedBackground } from "@/components/AnimatedBackground";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-accent/10 to-background overflow-hidden">
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl"></div>
-      </div>
+    <div className="min-h-screen overflow-hidden relative">
+      <AnimatedBackground variant="mesh" />
 
       {/* Hero Section */}
       <div className="container mx-auto px-6 py-24 relative">

@@ -32,11 +32,13 @@ import {
 import { exportAnalyticsToCSV, exportAnalyticsToPDF } from "@/lib/export-utils";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { StatCardSkeleton, ChartSkeleton, CardSkeleton } from "@/components/skeletons/CardSkeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Analytics = () => {
   const { toast } = useToast();
   
-  const { data: content } = useQuery({
+  const { data: content, isLoading } = useQuery({
     queryKey: ["analytics-content"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -162,8 +164,14 @@ const Analytics = () => {
 
         {/* Key Metrics */}
         <div className="grid gap-4 md:grid-cols-4">
-          <ScrollReveal variant="fade-up" delay={0.1}>
-            <Card>
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <StatCardSkeleton key={i} />
+            ))
+          ) : (
+            <>
+              <ScrollReveal variant="fade-up" delay={0.1}>
+                <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Content</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
@@ -221,12 +229,21 @@ const Analytics = () => {
             </CardContent>
           </Card>
           </ScrollReveal>
+            </>
+          )}
         </div>
 
         {/* Charts */}
         <div className="grid gap-4 md:grid-cols-2">
-          <ScrollReveal variant="fade-right">
-            <Card>
+          {isLoading ? (
+            <>
+              <ChartSkeleton />
+              <ChartSkeleton />
+            </>
+          ) : (
+            <>
+              <ScrollReveal variant="fade-right">
+                <Card>
             <CardHeader>
               <CardTitle>Generation Trend</CardTitle>
               <CardDescription>Content generated over the last 7 days</CardDescription>
@@ -289,11 +306,16 @@ const Analytics = () => {
             </CardContent>
           </Card>
           </ScrollReveal>
+            </>
+          )}
         </div>
 
         {/* Status Breakdown */}
-        <ScrollReveal variant="scale">
-          <Card>
+        {isLoading ? (
+          <ChartSkeleton />
+        ) : (
+          <ScrollReveal variant="scale">
+            <Card>
           <CardHeader>
             <CardTitle>Content Status Breakdown</CardTitle>
             <CardDescription>Distribution of content by status</CardDescription>
@@ -329,11 +351,15 @@ const Analytics = () => {
             </ChartContainer>
           </CardContent>
         </Card>
-        </ScrollReveal>
-
+          </ScrollReveal>
+        )}
+        
         {/* Recent Activity */}
-        <ScrollReveal variant="fade-up">
-          <Card>
+        {isLoading ? (
+          <CardSkeleton />
+        ) : (
+          <ScrollReveal variant="fade-up">
+            <Card>
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
             <CardDescription>Latest content generated</CardDescription>
@@ -368,7 +394,8 @@ const Analytics = () => {
             </div>
           </CardContent>
         </Card>
-        </ScrollReveal>
+          </ScrollReveal>
+        )}
       </div>
     </div>
   );

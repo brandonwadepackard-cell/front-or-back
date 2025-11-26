@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
+import { TemplateCardSkeleton } from "@/components/skeletons/CardSkeleton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -322,12 +323,11 @@ const Templates = () => {
               </div>
 
           {isLoading ? (
-            <Card className="border-0 shadow-lg">
-              <CardContent className="py-16 text-center">
-                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent mb-4"></div>
-                <p className="text-muted-foreground">Loading templates...</p>
-              </CardContent>
-            </Card>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <TemplateCardSkeleton key={i} />
+              ))}
+            </div>
           ) : templates && templates.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {templates.map((template, index) => (

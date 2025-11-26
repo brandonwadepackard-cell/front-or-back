@@ -1,4 +1,5 @@
 import { Bell, Check, CheckCheck } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,14 +11,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotifications } from "@/hooks/use-notifications";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
+
+type NotificationType = "all" | "success" | "warning" | "error" | "info";
 
 export const NotificationCenter = () => {
   const { notifications, loading, unreadCount, markAsRead, markAllAsRead } =
     useNotifications();
   const navigate = useNavigate();
+  const [filter, setFilter] = useState<NotificationType>("all");
+
+  const filteredNotifications =
+    filter === "all"
+      ? notifications
+      : notifications.filter((n) => n.type === filter);
 
   const handleNotificationClick = (notification: typeof notifications[0]) => {
     markAsRead(notification.id);
@@ -54,7 +64,7 @@ export const NotificationCenter = () => {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 bg-background z-50">
+      <DropdownMenuContent align="end" className="w-96 bg-background z-50">
         <div className="flex items-center justify-between px-2 py-2">
           <DropdownMenuLabel className="p-0">Notifications</DropdownMenuLabel>
           {unreadCount > 0 && (
@@ -70,18 +80,44 @@ export const NotificationCenter = () => {
           )}
         </div>
         <DropdownMenuSeparator />
+        <div className="px-2 py-2">
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as NotificationType)}>
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="all" className="text-xs">
+                All
+              </TabsTrigger>
+              <TabsTrigger value="success" className="text-xs">
+                ✅
+              </TabsTrigger>
+              <TabsTrigger value="info" className="text-xs">
+                ℹ️
+              </TabsTrigger>
+              <TabsTrigger value="warning" className="text-xs">
+                ⚠️
+              </TabsTrigger>
+              <TabsTrigger value="error" className="text-xs">
+                ❌
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        <DropdownMenuSeparator />
         <ScrollArea className="h-[400px]">
           {loading ? (
             <div className="p-4 text-center text-muted-foreground">
               Loading notifications...
             </div>
-          ) : notifications.length === 0 ? (
+          ) : filteredNotifications.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               <Bell className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>No notifications yet</p>
+              <p>
+                {filter === "all"
+                  ? "No notifications yet"
+                  : `No ${filter} notifications`}
+              </p>
             </div>
           ) : (
-            notifications.map((notification) => (
+            filteredNotifications.map((notification) => (
               <DropdownMenuItem
                 key={notification.id}
                 className={`flex flex-col items-start gap-1 p-3 cursor-pointer ${

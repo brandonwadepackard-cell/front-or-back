@@ -11,6 +11,7 @@ import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -20,9 +21,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronLeft, ChevronRight, Clock, Copy, Check, CalendarIcon, Trash2, Repeat } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Copy, Check, CalendarIcon, Trash2, Repeat, Eye } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek } from "date-fns";
 import { cn } from "@/lib/utils";
+import { PlatformPreview } from "@/components/PlatformPreview";
 
 interface ContentItem {
   id: string;
@@ -425,7 +427,7 @@ const Calendar = () => {
           setSelectedItem(null);
           setIsEditing(false);
         }}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <span>{selectedItem && getPlatformEmoji(selectedItem.platform)}</span>
@@ -441,7 +443,16 @@ const Calendar = () => {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4 py-4">
+            <Tabs defaultValue="details" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="details">Details</TabsTrigger>
+                <TabsTrigger value="preview" className="flex items-center gap-2">
+                  <Eye className="h-4 w-4" />
+                  Preview
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="details" className="space-y-4 py-4">
               {isEditing ? (
                 <>
                   <div className="space-y-2">
@@ -646,7 +657,24 @@ const Calendar = () => {
                   </div>
                 </>
               )}
-            </div>
+              </TabsContent>
+
+              <TabsContent value="preview" className="py-4">
+                {selectedItem && (
+                  <div className="space-y-4">
+                    <div className="text-center text-sm text-muted-foreground mb-6">
+                      Preview how your content will appear on{" "}
+                      <span className="font-semibold capitalize">{selectedItem.platform}</span>
+                    </div>
+                    <PlatformPreview
+                      platform={selectedItem.platform}
+                      content={selectedItem.content}
+                      scheduledAt={selectedItem.scheduled_at}
+                    />
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
 
             <DialogFooter className="flex gap-2">
               {isEditing ? (

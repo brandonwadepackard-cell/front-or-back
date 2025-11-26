@@ -36,12 +36,13 @@ const Library = () => {
   const [newTag, setNewTag] = useState('');
   const [newCategory, setNewCategory] = useState('');
   const [filterType, setFilterType] = useState<LibraryItemType | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const queryClient = useQueryClient();
 
   // Fetch library items
   const { data: items = [], isLoading } = useQuery({
-    queryKey: ['library-items', filterType],
+    queryKey: ['library-items', filterType, searchQuery],
     queryFn: async () => {
       let query = supabase
         .from('library_items')
@@ -58,6 +59,17 @@ const Library = () => {
 
       const { data, error } = await query;
       if (error) throw error;
+      
+      // Client-side filtering for search including transcriptions
+      if (searchQuery && data) {
+        const lowerQuery = searchQuery.toLowerCase();
+        return data.filter(item => 
+          item.title.toLowerCase().includes(lowerQuery) ||
+          item.description?.toLowerCase().includes(lowerQuery) ||
+          item.content?.toLowerCase().includes(lowerQuery)
+        );
+      }
+      
       return data || [];
     }
   });
@@ -87,15 +99,17 @@ const Library = () => {
     mutationFn: async (item: typeof newItem) => {
       let storagePath = null;
       let thumbnailPath = null;
+      let fileName = null;
+      let bucket = null;
 
       // Upload file if present
       if (item.file) {
-        const bucket = item.type === 'video' ? 'library-videos' 
+        bucket = item.type === 'video' ? 'library-videos' 
           : item.type === 'photo' ? 'library-photos'
           : 'library-voice-memos';
         
         const fileExt = item.file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+        fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
         
         const { error: uploadError } = await supabase.storage
           .from(bucket)
@@ -125,6 +139,26 @@ const Library = () => {
         .single();
 
       if (itemError) throw itemError;
+
+      // Trigger transcription for voice memos and videos
+      if ((item.type === 'voice_memo' || item.type === 'video') && fileName && bucket) {
+        // Fire and forget - transcription happens in background
+        supabase.functions.invoke('transcribe-media', {
+          body: {
+            itemId: libraryItem.id,
+            storagePath: fileName,
+            bucketName: bucket
+          }
+        }).then(({ data, error }) => {
+          if (error) {
+            console.error('Transcription error:', error);
+            toast.error('Transcription failed, but item was saved');
+          } else {
+            toast.success('Transcription completed!');
+            queryClient.invalidateQueries({ queryKey: ['library-items'] });
+          }
+        });
+      }
 
       // Add tags
       if (item.tags.length > 0) {
@@ -467,6 +501,15 @@ const Library = () => {
         </TabsList>
       </Tabs>
 
+      <div className="mb-4">
+        <Input
+          placeholder="Search library (includes transcriptions)..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="max-w-md"
+        />
+      </div>
+
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map(i => (
@@ -520,12 +563,34 @@ const Library = () => {
                   />
                 )}
                 {item.storage_path && item.type === 'voice_memo' && (
-                  <audio src={item.storage_path} controls className="w-full" />
+                  <div className="space-y-2">
+                    <audio src={item.storage_path} controls className="w-full" />
+                    {item.content && (
+                      <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                        <strong>Transcription:</strong> {item.content}
+                      </div>
+                    )}
+                  </div>
                 )}
-                {item.content && (
+                {item.type === 'video' && item.content && (
+                  <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                    <strong>Transcription:</strong> {item.content}
+                  </div>
+                )}
+                {item.type === 'text_idea' && item.content && (
                   <p className="text-sm text-muted-foreground line-clamp-3">
                     {item.content}
                   </p>
+                )}
+                {item.type === 'link' && item.content && (
+                  <a 
+                    href={item.content} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline line-clamp-2"
+                  >
+                    {item.content}
+                  </a>
                 )}
                 <div className="flex flex-wrap gap-1">
                   {item.library_item_tags?.map((t: any) => t.tags && (

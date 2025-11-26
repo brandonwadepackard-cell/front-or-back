@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import ContentGenerator from "./pages/ContentGenerator";
 import ContentHistory from "./pages/ContentHistory";
 import Templates from "./pages/Templates";
+import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/content" element={<ContentGenerator />} />
           <Route path="/history" element={<ContentHistory />} />
           <Route path="/templates" element={<Templates />} />
+          <Route path="/analytics" element={<Analytics />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

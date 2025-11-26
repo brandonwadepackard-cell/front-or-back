@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AnimatedBackground } from "@/components/AnimatedBackground";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -151,8 +152,9 @@ const Templates = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-background">
-      <div className="container mx-auto px-6 py-12">
+    <div className="min-h-screen relative overflow-hidden">
+      <AnimatedBackground variant="mesh" />
+      <div className="container mx-auto px-6 py-12 relative z-10">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
           <div className="space-y-3 animate-fade-in">

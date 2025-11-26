@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { 
   FileText, 
   Calendar, 
@@ -240,8 +241,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-background">
-      <div className="container mx-auto px-6 py-12 space-y-8">
+    <div className="min-h-screen relative overflow-hidden">
+      <AnimatedBackground variant="mesh" />
+      <div className="container mx-auto px-6 py-12 space-y-8 relative z-10">
         {/* Header */}
         <div className="flex items-start justify-between animate-fade-in">
           <div className="space-y-2">

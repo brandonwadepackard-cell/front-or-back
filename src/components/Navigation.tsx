@@ -1,5 +1,13 @@
 import { NavLink } from "@/components/NavLink";
-import { Brain } from "lucide-react";
+import { Brain, Menu } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { useLocation } from "react-router-dom";
 
 export const Navigation = () => {
   return (
@@ -11,58 +19,51 @@ export const Navigation = () => {
             <span>Brandon Hub</span>
           </NavLink>
           
-          <div className="flex items-center gap-6">
-            <NavLink
-              to="/"
-              end
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              activeClassName="text-foreground font-medium"
-            >
-              Home
-            </NavLink>
-            <NavLink
-              to="/content"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              activeClassName="text-foreground font-medium"
-            >
-              Content Generator
-            </NavLink>
-            <NavLink
-              to="/templates"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              activeClassName="text-foreground font-medium"
-            >
-              Templates
-            </NavLink>
-            <NavLink
-              to="/history"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              activeClassName="text-foreground font-medium"
-            >
-              History
-            </NavLink>
-            <NavLink
-              to="/analytics"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              activeClassName="text-foreground font-medium"
-            >
-              Analytics
-            </NavLink>
-            <NavLink
-              to="/calendar"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              activeClassName="text-foreground font-medium"
-            >
-              Calendar
-            </NavLink>
-            <NavLink
-              to="/bulk-schedule"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              activeClassName="text-foreground font-medium"
-            >
-              Bulk Schedule
-            </NavLink>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Menu className="h-4 w-4" />
+                Menu
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 bg-background z-50">
+              <DropdownMenuItem asChild>
+                <NavLink to="/" end className="w-full cursor-pointer">
+                  Home
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/content" className="w-full cursor-pointer">
+                  Content Generator
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/templates" className="w-full cursor-pointer">
+                  Templates
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/history" className="w-full cursor-pointer">
+                  History
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/analytics" className="w-full cursor-pointer">
+                  Analytics
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/calendar" className="w-full cursor-pointer">
+                  Calendar
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/bulk-schedule" className="w-full cursor-pointer">
+                  Bulk Schedule
+                </NavLink>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </nav>

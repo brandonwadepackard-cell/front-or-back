@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ContentOptimizer } from "@/components/ContentOptimizer";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { LibrarySuggestions } from "@/components/LibrarySuggestions";
 
 export default function ContentGenerator() {
   const [searchParams] = useSearchParams();
@@ -40,6 +41,14 @@ export default function ContentGenerator() {
     reason: string;
     optimal_time: string;
     time_reason: string;
+  }>>([]);
+  
+  const [loadingLibrarySuggestions, setLoadingLibrarySuggestions] = useState(false);
+  const [librarySuggestions, setLibrarySuggestions] = useState<Array<{
+    item_id: string;
+    reason: string;
+    usage_tip: string;
+    item: any;
   }>>([]);
 
   // Update form when URL params change (from templates)
@@ -127,6 +136,26 @@ export default function ContentGenerator() {
     }
 
     setIsGenerating(true);
+    
+    // Fetch library suggestions in parallel
+    const fetchLibrarySuggestions = async () => {
+      setLoadingLibrarySuggestions(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('suggest-library-content', {
+          body: { topic: topic.trim(), platform }
+        });
+
+        if (!error && data?.success) {
+          setLibrarySuggestions(data.suggestions || []);
+        }
+      } catch (error) {
+        console.error('Error fetching library suggestions:', error);
+      } finally {
+        setLoadingLibrarySuggestions(false);
+      }
+    };
+
+    fetchLibrarySuggestions();
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-content', {
@@ -546,6 +575,16 @@ export default function ContentGenerator() {
           />
         )}
         </ScrollReveal>
+
+        {/* Library Suggestions */}
+        {librarySuggestions.length > 0 && (
+          <ScrollReveal variant="fade-up" delay={0.3}>
+            <LibrarySuggestions 
+              suggestions={librarySuggestions} 
+              isLoading={loadingLibrarySuggestions}
+            />
+          </ScrollReveal>
+        )}
 
         {/* Recent Content */}
         <div className="space-y-4">

@@ -2,3 +2,18 @@ project_id = "vopotefpdlrzfyycimqk"
 
 [functions.generate-content]
 verify_jwt = false
+
+[functions.generate-recurring-content]
+verify_jwt = false
+
+[functions.generate-content-suggestions]
+verify_jwt = false
+
+[functions.suggest-hashtags]
+verify_jwt = false
+
+[functions.copilot-chat]
+verify_jwt = false
+
+[functions.suggest-library-content]
+verify_jwt = false

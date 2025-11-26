@@ -1,5 +1,6 @@
 import { NavLink } from "@/components/NavLink";
-import { Brain, Menu, Home, LayoutDashboard, FileText, Layout, Clock, BarChart, Calendar, CalendarRange, Archive, Globe } from "lucide-react";
+import { Brain, Menu, Home, LayoutDashboard, FileText, Layout, Clock, BarChart, Calendar, CalendarRange, Archive, Globe, Shield } from "lucide-react";
+import { useAdminCheck } from "@/hooks/use-admin-check";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 
 export const Navigation = () => {
   useKeyboardShortcuts();
+  const { isAdmin } = useAdminCheck();
   
   return (
     <nav className="border-b bg-card/80 backdrop-blur-lg supports-[backdrop-filter]:bg-card/60 sticky top-0 z-50 shadow-sm">
@@ -121,6 +123,19 @@ export const Navigation = () => {
                   <DropdownMenuShortcut>⌘⇧W</DropdownMenuShortcut>
                 </NavLink>
               </DropdownMenuItem>
+
+              {isAdmin && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Admin</DropdownMenuLabel>
+                  <DropdownMenuItem asChild>
+                    <NavLink to="/admin" className="w-full cursor-pointer flex items-center gap-2">
+                      <Shield className="h-4 w-4" />
+                      Admin Dashboard
+                    </NavLink>
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           </div>

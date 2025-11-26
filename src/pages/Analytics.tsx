@@ -8,7 +8,20 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  PieChart, 
+  Pie, 
+  Cell, 
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Legend,
+} from "recharts";
 
 const Analytics = () => {
   const { data: content } = useQuery({
@@ -28,6 +41,14 @@ const Analytics = () => {
   const totalContent = content?.length || 0;
   const draftContent = content?.filter(c => c.status === "draft").length || 0;
   const publishedContent = content?.filter(c => c.status === "published").length || 0;
+  const scheduledContent = content?.filter(c => c.status === "scheduled").length || 0;
+
+  // Status breakdown data
+  const statusData = [
+    { name: "Draft", value: draftContent, color: "hsl(var(--muted))" },
+    { name: "Scheduled", value: scheduledContent, color: "hsl(var(--accent))" },
+    { name: "Published", value: publishedContent, color: "hsl(var(--primary))" },
+  ].filter(item => item.value > 0);
 
   // Platform distribution
   const platformCounts = content?.reduce((acc, item) => {
@@ -79,7 +100,7 @@ const Analytics = () => {
         </div>
 
         {/* Key Metrics */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Content</CardTitle>
@@ -95,13 +116,26 @@ const Analytics = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Scheduled</CardTitle>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">{scheduledContent}</div>
+              <p className="text-xs text-muted-foreground">
+                Ready to publish
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Published</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">{publishedContent}</div>
               <p className="text-xs text-muted-foreground">
-                Ready to use
+                Live content
               </p>
             </CardContent>
           </Card>
@@ -139,6 +173,7 @@ const Analytics = () => {
                   <YAxis 
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
+                    allowDecimals={false}
                   />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Area
@@ -182,6 +217,44 @@ const Analytics = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Status Breakdown */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Content Status Breakdown</CardTitle>
+            <CardDescription>Distribution of content by status</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={{}} className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={statusData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                  />
+                  <YAxis 
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                    allowDecimals={false}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Legend />
+                  <Bar 
+                    dataKey="value" 
+                    name="Count"
+                    radius={[8, 8, 0, 0]}
+                  >
+                    {statusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        </Card>
 
         {/* Recent Activity */}
         <Card>

@@ -102,6 +102,46 @@ const ContentHistory = () => {
     deleteMutation.mutate(selectedIds);
   };
 
+  const regenerateMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      // Get the selected content items
+      const itemsToRegenerate = content?.filter(item => ids.includes(item.id));
+      if (!itemsToRegenerate) return;
+
+      // Regenerate each item
+      const results = await Promise.all(
+        itemsToRegenerate.map(async (item) => {
+          const { error } = await supabase.functions.invoke('generate-content', {
+            body: { topic: item.topic, platform: item.platform }
+          });
+          if (error) throw error;
+        })
+      );
+      
+      return results;
+    },
+    onSuccess: (_, ids) => {
+      queryClient.invalidateQueries({ queryKey: ["content-history"] });
+      toast({
+        title: "Regenerated!",
+        description: `${ids.length} new variation${ids.length > 1 ? 's' : ''} created`,
+      });
+      setSelectedIds([]);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to regenerate content",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleRegenerate = () => {
+    if (selectedIds.length === 0) return;
+    regenerateMutation.mutate(selectedIds);
+  };
+
   const copyToClipboard = async (text: string, id: string) => {
     await navigator.clipboard.writeText(text);
     setCopiedId(id);
@@ -216,6 +256,14 @@ const ContentHistory = () => {
                 <div className="flex gap-2">
                   {selectedIds.length > 0 && (
                     <>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleRegenerate}
+                        disabled={regenerateMutation.isPending}
+                      >
+                        {regenerateMutation.isPending ? "Regenerating..." : `Regenerate (${selectedIds.length})`}
+                      </Button>
                       <Button variant="outline" size="sm" onClick={handleBatchDelete}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete ({selectedIds.length})

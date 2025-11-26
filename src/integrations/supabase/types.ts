@@ -270,6 +270,7 @@ export type Database = {
           query: string
           recurrence_enabled: boolean | null
           recurrence_interval: string | null
+          recurrence_paused: boolean | null
           recurrence_time: string | null
           sources: string[] | null
           status: Database["public"]["Enums"]["job_status"] | null
@@ -287,6 +288,7 @@ export type Database = {
           query: string
           recurrence_enabled?: boolean | null
           recurrence_interval?: string | null
+          recurrence_paused?: boolean | null
           recurrence_time?: string | null
           sources?: string[] | null
           status?: Database["public"]["Enums"]["job_status"] | null
@@ -304,6 +306,7 @@ export type Database = {
           query?: string
           recurrence_enabled?: boolean | null
           recurrence_interval?: string | null
+          recurrence_paused?: boolean | null
           recurrence_time?: string | null
           sources?: string[] | null
           status?: Database["public"]["Enums"]["job_status"] | null

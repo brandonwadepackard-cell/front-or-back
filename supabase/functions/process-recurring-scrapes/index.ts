@@ -20,11 +20,12 @@ serve(async (req) => {
 
     const now = new Date();
 
-    // Find jobs that need to run
+    // Find jobs that need to run (enabled, not paused, and due)
     const { data: jobsToRun, error: fetchError } = await supabase
       .from('scrape_jobs')
       .select('*')
       .eq('recurrence_enabled', true)
+      .eq('recurrence_paused', false)
       .lte('next_run_at', now.toISOString())
       .or('status.eq.completed,status.eq.failed,status.eq.cancelled');
 

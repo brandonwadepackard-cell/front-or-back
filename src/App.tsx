@@ -20,6 +20,7 @@ import Library from "./pages/Library";
 import Scraper from "./pages/Scraper";
 import ScraperResults from "./pages/ScraperResults";
 import AdminDashboard from "./pages/AdminDashboard";
+import NativeFeatures from "./pages/NativeFeatures";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const AnimatedRoutes = () => {
           <Route path="/scraper" element={<PageTransition><Scraper /></PageTransition>} />
           <Route path="/scraper/:jobId" element={<PageTransition><ScraperResults /></PageTransition>} />
           <Route path="/admin" element={<PageTransition><AdminDashboard /></PageTransition>} />
+          <Route path="/native-features" element={<PageTransition><NativeFeatures /></PageTransition>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>

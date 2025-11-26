@@ -26,6 +26,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSam
 import { cn } from "@/lib/utils";
 import { PlatformPreview } from "@/components/PlatformPreview";
 import { ContentOptimizer } from "@/components/ContentOptimizer";
+import { ScrollReveal } from "@/components/ScrollReveal";
 
 interface ContentItem {
   id: string;
@@ -289,7 +290,8 @@ const Calendar = () => {
       <div className="container mx-auto px-6 py-12">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8 flex items-center justify-between">
+          <ScrollReveal variant="fade-up">
+            <div className="mb-8 flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold mb-2">Content Calendar</h1>
               <p className="text-muted-foreground">
@@ -311,8 +313,10 @@ const Calendar = () => {
               </Button>
             </div>
           </div>
+          </ScrollReveal>
 
           {/* Calendar Grid */}
+          <ScrollReveal variant="scale" delay={0.1}>
           {isLoading ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">Loading calendar...</p>
@@ -408,9 +412,11 @@ const Calendar = () => {
               </CardContent>
             </Card>
           )}
+          </ScrollReveal>
 
           {/* Legend */}
-          <Card className="mt-6">
+          <ScrollReveal variant="fade-up" delay={0.2}>
+            <Card className="mt-6">
             <CardHeader>
               <CardTitle className="text-lg">How to use</CardTitle>
             </CardHeader>
@@ -421,6 +427,7 @@ const Calendar = () => {
               <p>• Badge numbers show how many posts are scheduled for each day</p>
             </CardContent>
           </Card>
+          </ScrollReveal>
         </div>
 
         {/* Content Detail Modal */}

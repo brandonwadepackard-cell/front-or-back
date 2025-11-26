@@ -17,6 +17,7 @@ import { useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ContentOptimizer } from "@/components/ContentOptimizer";
+import { ScrollReveal } from "@/components/ScrollReveal";
 
 export default function ContentGenerator() {
   const [searchParams] = useSearchParams();
@@ -255,17 +256,20 @@ export default function ContentGenerator() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-            Content Generator
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            AI-powered social media content creation
-          </p>
-        </div>
+        <ScrollReveal variant="fade-up">
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              Content Generator
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              AI-powered social media content creation
+            </p>
+          </div>
+        </ScrollReveal>
 
         {/* AI Suggestions Card */}
-        <Card className="border-2 shadow-lg">
+        <ScrollReveal variant="fade-up" delay={0.1}>
+          <Card className="border-2 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Lightbulb className="w-5 h-5 text-primary" />
@@ -331,9 +335,11 @@ export default function ContentGenerator() {
             )}
           </CardContent>
         </Card>
+        </ScrollReveal>
 
         {/* Generator Card */}
-        <Card className="border-2 shadow-lg">
+        <ScrollReveal variant="scale" delay={0.2}>
+          <Card className="border-2 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
@@ -539,6 +545,7 @@ export default function ContentGenerator() {
             }}
           />
         )}
+        </ScrollReveal>
 
         {/* Recent Content */}
         <div className="space-y-4">

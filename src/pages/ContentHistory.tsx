@@ -32,6 +32,7 @@ import { Search, Copy, Check, Download, Trash2, CalendarIcon, Clock, Edit, MoreV
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { ScrollReveal } from "@/components/ScrollReveal";
 
 const ContentHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -370,15 +371,18 @@ const ContentHistory = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto px-6 py-12">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Content History</h1>
-            <p className="text-muted-foreground">
-              View and manage all your generated content
-            </p>
-          </div>
+          <ScrollReveal variant="fade-up">
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold mb-2">Content History</h1>
+              <p className="text-muted-foreground">
+                View and manage all your generated content
+              </p>
+            </div>
+          </ScrollReveal>
 
           {/* Filters and Batch Actions */}
-          <Card className="mb-8">
+          <ScrollReveal variant="fade-up" delay={0.1}>
+            <Card className="mb-8">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div>
@@ -510,6 +514,7 @@ const ContentHistory = () => {
               )}
             </CardContent>
           </Card>
+          </ScrollReveal>
 
           {/* Results */}
           {isLoading ? (

@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,8 @@ const ContentHistory = () => {
   const [platformFilter, setPlatformFilter] = useState("all");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showBatchDelete, setShowBatchDelete] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -48,21 +51,23 @@ const ContentHistory = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (ids: string[]) => {
       const { error } = await supabase
         .from("content")
         .delete()
-        .eq("id", id);
+        .in("id", ids);
 
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, ids) => {
       queryClient.invalidateQueries({ queryKey: ["content-history"] });
       toast({
         title: "Deleted!",
-        description: "Content removed from history",
+        description: `${ids.length} item${ids.length > 1 ? 's' : ''} removed from history`,
       });
       setDeleteId(null);
+      setShowBatchDelete(false);
+      setSelectedIds([]);
     },
     onError: () => {
       toast({
@@ -72,6 +77,30 @@ const ContentHistory = () => {
       });
     },
   });
+
+  const toggleSelection = (id: string) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (!filteredContent) return;
+    if (selectedIds.length === filteredContent.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredContent.map(item => item.id));
+    }
+  };
+
+  const handleBatchDelete = () => {
+    if (selectedIds.length === 0) return;
+    setShowBatchDelete(true);
+  };
+
+  const confirmBatchDelete = () => {
+    deleteMutation.mutate(selectedIds);
+  };
 
   const copyToClipboard = async (text: string, id: string) => {
     await navigator.clipboard.writeText(text);
@@ -93,7 +122,11 @@ const ContentHistory = () => {
   };
 
   const exportToJSON = () => {
-    if (!filteredContent || filteredContent.length === 0) {
+    const dataToExport = selectedIds.length > 0
+      ? content?.filter(item => selectedIds.includes(item.id))
+      : filteredContent;
+
+    if (!dataToExport || dataToExport.length === 0) {
       toast({
         title: "No data to export",
         description: "There is no content to export",
@@ -102,7 +135,7 @@ const ContentHistory = () => {
       return;
     }
 
-    const dataStr = JSON.stringify(filteredContent, null, 2);
+    const dataStr = JSON.stringify(dataToExport, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
@@ -113,12 +146,17 @@ const ContentHistory = () => {
 
     toast({
       title: "Exported!",
-      description: "Content exported as JSON",
+      description: `${dataToExport.length} item${dataToExport.length > 1 ? 's' : ''} exported as JSON`,
     });
+    setSelectedIds([]);
   };
 
   const exportToCSV = () => {
-    if (!filteredContent || filteredContent.length === 0) {
+    const dataToExport = selectedIds.length > 0
+      ? content?.filter(item => selectedIds.includes(item.id))
+      : filteredContent;
+
+    if (!dataToExport || dataToExport.length === 0) {
       toast({
         title: "No data to export",
         description: "There is no content to export",
@@ -128,7 +166,7 @@ const ContentHistory = () => {
     }
 
     const headers = ["Date", "Platform", "Topic", "Content", "Status"];
-    const rows = filteredContent.map((item) => [
+    const rows = dataToExport.map((item) => [
       new Date(item.created_at).toLocaleString(),
       item.platform,
       item.topic,
@@ -151,8 +189,9 @@ const ContentHistory = () => {
 
     toast({
       title: "Exported!",
-      description: "Content exported as CSV",
+      description: `${dataToExport.length} item${dataToExport.length > 1 ? 's' : ''} exported as CSV`,
     });
+    setSelectedIds([]);
   };
 
   return (
@@ -166,7 +205,7 @@ const ContentHistory = () => {
             </p>
           </div>
 
-          {/* Filters */}
+          {/* Filters and Batch Actions */}
           <Card className="mb-8">
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -175,13 +214,21 @@ const ContentHistory = () => {
                   <CardDescription>Search and filter your content</CardDescription>
                 </div>
                 <div className="flex gap-2">
+                  {selectedIds.length > 0 && (
+                    <>
+                      <Button variant="outline" size="sm" onClick={handleBatchDelete}>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete ({selectedIds.length})
+                      </Button>
+                    </>
+                  )}
                   <Button variant="outline" size="sm" onClick={exportToCSV}>
                     <Download className="h-4 w-4 mr-2" />
-                    CSV
+                    CSV {selectedIds.length > 0 && `(${selectedIds.length})`}
                   </Button>
                   <Button variant="outline" size="sm" onClick={exportToJSON}>
                     <Download className="h-4 w-4 mr-2" />
-                    JSON
+                    JSON {selectedIds.length > 0 && `(${selectedIds.length})`}
                   </Button>
                 </div>
               </div>
@@ -229,51 +276,75 @@ const ContentHistory = () => {
               <p className="text-muted-foreground">Loading content...</p>
             </div>
           ) : filteredContent && filteredContent.length > 0 ? (
-            <div className="grid gap-4">
-              {filteredContent.map((item) => (
-                <Card key={item.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="flex items-center gap-2">
-                          <span>{getPlatformEmoji(item.platform)}</span>
-                          <span className="capitalize">{item.platform}</span>
-                        </CardTitle>
-                        <CardDescription className="mt-1">
-                          Topic: {item.topic}
-                        </CardDescription>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(item.created_at).toLocaleString()}
-                        </p>
+            <>
+              {/* Select All Header */}
+              <div className="flex items-center gap-2 mb-4 p-3 bg-muted/50 rounded-lg">
+                <Checkbox
+                  checked={selectedIds.length === filteredContent.length}
+                  onCheckedChange={toggleSelectAll}
+                  id="select-all"
+                />
+                <label
+                  htmlFor="select-all"
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  {selectedIds.length > 0
+                    ? `${selectedIds.length} selected`
+                    : "Select all"}
+                </label>
+              </div>
+
+              <div className="grid gap-4">
+                {filteredContent.map((item) => (
+                  <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start gap-3">
+                        <Checkbox
+                          checked={selectedIds.includes(item.id)}
+                          onCheckedChange={() => toggleSelection(item.id)}
+                          className="mt-1"
+                        />
+                        <div className="flex-1">
+                          <CardTitle className="flex items-center gap-2">
+                            <span>{getPlatformEmoji(item.platform)}</span>
+                            <span className="capitalize">{item.platform}</span>
+                          </CardTitle>
+                          <CardDescription className="mt-1">
+                            Topic: {item.topic}
+                          </CardDescription>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(item.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(item.content, item.id)}
+                          >
+                            {copiedId === item.id ? (
+                              <Check className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <Copy className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setDeleteId(item.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyToClipboard(item.content, item.id)}
-                        >
-                          {copiedId === item.id ? (
-                            <Check className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <Copy className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeleteId(item.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="whitespace-pre-wrap text-sm">{item.content}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="whitespace-pre-wrap text-sm">{item.content}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
           ) : (
             <Card>
               <CardContent className="py-12 text-center">
@@ -287,7 +358,7 @@ const ContentHistory = () => {
           )}
         </div>
 
-        {/* Delete Confirmation Dialog */}
+        {/* Delete Confirmation Dialogs */}
         <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -299,10 +370,31 @@ const ContentHistory = () => {
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                onClick={() => deleteId && deleteMutation.mutate(deleteId)}
+                onClick={() => deleteId && deleteMutation.mutate([deleteId])}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
                 Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={showBatchDelete} onOpenChange={setShowBatchDelete}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete {selectedIds.length} Items?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete {selectedIds.length} item
+                {selectedIds.length > 1 ? 's' : ''} from your history.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmBatchDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete All
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

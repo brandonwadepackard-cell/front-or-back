@@ -23,6 +23,7 @@ import ScraperResults from "./pages/ScraperResults";
 import AdminDashboard from "./pages/AdminDashboard";
 import NativeFeatures from "./pages/NativeFeatures";
 import DeepLinking from "./pages/DeepLinking";
+import QRCodeShare from "./pages/QRCodeShare";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ const AnimatedRoutes = () => {
           <Route path="/admin" element={<PageTransition><AdminDashboard /></PageTransition>} />
           <Route path="/native-features" element={<PageTransition><NativeFeatures /></PageTransition>} />
           <Route path="/deep-linking" element={<PageTransition><DeepLinking /></PageTransition>} />
+          <Route path="/qr-share" element={<PageTransition><QRCodeShare /></PageTransition>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>

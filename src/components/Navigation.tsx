@@ -1,5 +1,5 @@
 import { NavLink } from "@/components/NavLink";
-import { Brain, Menu, Home, LayoutDashboard, FileText, Layout, Clock, BarChart, Calendar, CalendarRange, Archive, Globe, Shield, Smartphone, Link2 } from "lucide-react";
+import { Brain, Menu, Home, LayoutDashboard, FileText, Layout, Clock, BarChart, Calendar, CalendarRange, Archive, Globe, Shield, Smartphone, Link2, QrCode } from "lucide-react";
 import { useAdminCheck } from "@/hooks/use-admin-check";
 import {
   DropdownMenu,
@@ -134,6 +134,12 @@ export const Navigation = () => {
                 <NavLink to="/deep-linking" className="w-full cursor-pointer flex items-center gap-2">
                   <Link2 className="h-4 w-4" />
                   Deep Linking
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink to="/qr-share" className="w-full cursor-pointer flex items-center gap-2">
+                  <QrCode className="h-4 w-4" />
+                  QR Codes
                 </NavLink>
               </DropdownMenuItem>
 

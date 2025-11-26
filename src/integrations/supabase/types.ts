@@ -264,8 +264,13 @@ export type Database = {
           extract_contacts: boolean | null
           extract_prices: boolean | null
           id: string
+          last_run_at: string | null
           name: string | null
+          next_run_at: string | null
           query: string
+          recurrence_enabled: boolean | null
+          recurrence_interval: string | null
+          recurrence_time: string | null
           sources: string[] | null
           status: Database["public"]["Enums"]["job_status"] | null
           updated_at: string
@@ -276,8 +281,13 @@ export type Database = {
           extract_contacts?: boolean | null
           extract_prices?: boolean | null
           id?: string
+          last_run_at?: string | null
           name?: string | null
+          next_run_at?: string | null
           query: string
+          recurrence_enabled?: boolean | null
+          recurrence_interval?: string | null
+          recurrence_time?: string | null
           sources?: string[] | null
           status?: Database["public"]["Enums"]["job_status"] | null
           updated_at?: string
@@ -288,8 +298,13 @@ export type Database = {
           extract_contacts?: boolean | null
           extract_prices?: boolean | null
           id?: string
+          last_run_at?: string | null
           name?: string | null
+          next_run_at?: string | null
           query?: string
+          recurrence_enabled?: boolean | null
+          recurrence_interval?: string | null
+          recurrence_time?: string | null
           sources?: string[] | null
           status?: Database["public"]["Enums"]["job_status"] | null
           updated_at?: string

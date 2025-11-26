@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Globe, Plus, Loader2, CheckCircle, XCircle, Clock, Play, TrendingUp } from "lucide-react";
+import { Globe, Plus, Loader2, CheckCircle, XCircle, Clock, Play, TrendingUp, Repeat } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 
@@ -24,6 +24,10 @@ interface ScrapeJob {
   extract_prices: boolean;
   extract_contacts: boolean;
   status: JobStatus;
+  recurrence_enabled?: boolean;
+  recurrence_interval?: string;
+  recurrence_time?: string;
+  next_run_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -53,6 +57,9 @@ const Scraper = () => {
     sources: [] as string[],
     extractPrices: true,
     extractContacts: false,
+    recurrenceEnabled: false,
+    recurrenceInterval: 'daily' as 'daily' | 'weekly' | 'monthly',
+    recurrenceTime: '09:00',
   });
   const [filterStatus, setFilterStatus] = useState<JobStatus | 'all'>('all');
 
@@ -104,6 +111,20 @@ const Scraper = () => {
   // Create job mutation
   const createJobMutation = useMutation({
     mutationFn: async (job: typeof newJob) => {
+      // Calculate next run time if recurrence is enabled
+      let nextRunAt = null;
+      if (job.recurrenceEnabled && job.recurrenceTime) {
+        const [hours, minutes] = job.recurrenceTime.split(':').map(Number);
+        const nextRun = new Date();
+        nextRun.setHours(hours, minutes, 0, 0);
+        
+        // If time has passed today, set for tomorrow
+        if (nextRun <= new Date()) {
+          nextRun.setDate(nextRun.getDate() + 1);
+        }
+        nextRunAt = nextRun.toISOString();
+      }
+
       const { data, error } = await supabase
         .from('scrape_jobs')
         .insert({
@@ -112,6 +133,10 @@ const Scraper = () => {
           sources: job.sources,
           extract_prices: job.extractPrices,
           extract_contacts: job.extractContacts,
+          recurrence_enabled: job.recurrenceEnabled,
+          recurrence_interval: job.recurrenceEnabled ? job.recurrenceInterval : null,
+          recurrence_time: job.recurrenceEnabled ? job.recurrenceTime : null,
+          next_run_at: nextRunAt,
           status: 'pending'
         })
         .select()
@@ -131,6 +156,9 @@ const Scraper = () => {
         sources: [],
         extractPrices: true,
         extractContacts: false,
+        recurrenceEnabled: false,
+        recurrenceInterval: 'daily',
+        recurrenceTime: '09:00',
       });
     },
     onError: (error) => {
@@ -266,6 +294,63 @@ const Scraper = () => {
                 </div>
               </div>
 
+              <div className="space-y-3 border-t pt-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="recurrence-enabled"
+                    checked={newJob.recurrenceEnabled}
+                    onCheckedChange={(checked) => 
+                      setNewJob(prev => ({ ...prev, recurrenceEnabled: checked as boolean }))
+                    }
+                  />
+                  <Label htmlFor="recurrence-enabled" className="cursor-pointer font-medium">
+                    Schedule Recurring Scrapes
+                  </Label>
+                </div>
+
+                {newJob.recurrenceEnabled && (
+                  <div className="ml-6 space-y-3 border-l-2 border-primary/20 pl-4">
+                    <div>
+                      <Label htmlFor="recurrence-interval">Frequency</Label>
+                      <select
+                        id="recurrence-interval"
+                        value={newJob.recurrenceInterval}
+                        onChange={(e) => setNewJob(prev => ({ 
+                          ...prev, 
+                          recurrenceInterval: e.target.value as 'daily' | 'weekly' | 'monthly' 
+                        }))}
+                        className="w-full mt-1 px-3 py-2 border rounded-md bg-background"
+                      >
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="recurrence-time">Time of Day (24-hour format)</Label>
+                      <Input
+                        id="recurrence-time"
+                        type="time"
+                        value={newJob.recurrenceTime}
+                        onChange={(e) => setNewJob(prev => ({ ...prev, recurrenceTime: e.target.value }))}
+                        className="mt-1"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Next run: {(() => {
+                          const [hours, minutes] = newJob.recurrenceTime.split(':').map(Number);
+                          const nextRun = new Date();
+                          nextRun.setHours(hours, minutes, 0, 0);
+                          if (nextRun <= new Date()) {
+                            nextRun.setDate(nextRun.getDate() + 1);
+                          }
+                          return nextRun.toLocaleString();
+                        })()}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <Button
                 onClick={() => createJobMutation.mutate(newJob)}
                 disabled={!newJob.query || createJobMutation.isPending}
@@ -396,6 +481,17 @@ const Scraper = () => {
                               <Badge variant="secondary" className="text-xs">
                                 <TrendingUp className="h-3 w-3 mr-1" />
                                 Price Tracking
+                              </Badge>
+                            )}
+                            {job.recurrence_enabled && (
+                              <Badge variant="secondary" className="text-xs bg-purple-500/10 text-purple-500 border-purple-500/20">
+                                <Repeat className="h-3 w-3 mr-1" />
+                                {job.recurrence_interval}
+                                {job.next_run_at && (
+                                  <span className="ml-1">
+                                    (Next: {new Date(job.next_run_at).toLocaleString()})
+                                  </span>
+                                )}
                               </Badge>
                             )}
                           </div>

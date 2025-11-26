@@ -8,9 +8,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Sparkles, Copy, Check, CalendarIcon, Repeat } from "lucide-react";
+import { Loader2, Sparkles, Copy, Check, CalendarIcon, Repeat, Lightbulb, TrendingUp, Clock } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
@@ -29,6 +30,15 @@ export default function ContentGenerator() {
   const [recurrenceInterval, setRecurrenceInterval] = useState(1);
   const [recurrenceEndDate, setRecurrenceEndDate] = useState<Date>();
   const { toast } = useToast();
+
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<Array<{
+    topic: string;
+    platform: string;
+    reason: string;
+    optimal_time: string;
+    time_reason: string;
+  }>>([]);
 
   // Update form when URL params change (from templates)
   useEffect(() => {
@@ -165,6 +175,71 @@ export default function ContentGenerator() {
     }
   };
 
+  const handleGetSuggestions = async () => {
+    setLoadingSuggestions(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-content-suggestions', {
+        body: { platform }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        if (data.error.includes('Rate limit')) {
+          toast({
+            title: "Rate limit reached",
+            description: "Too many requests. Please wait a moment and try again.",
+            variant: "destructive"
+          });
+        } else if (data.error.includes('Payment required')) {
+          toast({
+            title: "Credits required",
+            description: "Please add credits to your Lovable AI workspace to continue.",
+            variant: "destructive"
+          });
+        } else {
+          throw new Error(data.error);
+        }
+        return;
+      }
+
+      setSuggestions(data.suggestions || []);
+      toast({
+        title: "Suggestions ready!",
+        description: "Click any suggestion to auto-fill the generator",
+      });
+    } catch (error: any) {
+      console.error('Error getting suggestions:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to get AI suggestions",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  const handleApplySuggestion = (suggestion: typeof suggestions[0]) => {
+    setTopic(suggestion.topic);
+    setPlatform(suggestion.platform);
+    
+    // Set optimal time
+    const [hours, minutes] = suggestion.optimal_time.split(':');
+    setScheduledTime(`${hours}:${minutes}`);
+    
+    // Set date to tomorrow at the suggested time
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    setScheduledDate(tomorrow);
+
+    toast({
+      title: "Suggestion applied!",
+      description: "Topic and optimal posting time have been set. Click Generate to create content.",
+    });
+  };
+
   const getPlatformEmoji = (platform: string) => {
     const emojis: Record<string, string> = {
       twitter: "🐦",
@@ -187,6 +262,74 @@ export default function ContentGenerator() {
             AI-powered social media content creation
           </p>
         </div>
+
+        {/* AI Suggestions Card */}
+        <Card className="border-2 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lightbulb className="w-5 h-5 text-primary" />
+              AI-Powered Suggestions
+            </CardTitle>
+            <CardDescription>
+              Get trending topic ideas with optimal posting times based on platform best practices
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button
+              onClick={handleGetSuggestions}
+              disabled={loadingSuggestions}
+              variant="outline"
+              className="w-full"
+            >
+              {loadingSuggestions ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Analyzing trends...
+                </>
+              ) : (
+                <>
+                  <TrendingUp className="mr-2 h-4 w-4" />
+                  Get AI Suggestions
+                </>
+              )}
+            </Button>
+
+            {suggestions.length > 0 && (
+              <div className="space-y-3">
+                {suggestions.map((suggestion, index) => (
+                  <Card
+                    key={index}
+                    className="cursor-pointer hover:bg-accent/50 transition-colors"
+                    onClick={() => handleApplySuggestion(suggestion)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="text-2xl mt-1">
+                          {suggestion.platform === 'twitter' && '𝕏'}
+                          {suggestion.platform === 'linkedin' && '💼'}
+                          {suggestion.platform === 'instagram' && '📸'}
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className="font-semibold text-sm">{suggestion.topic}</h4>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+                              <Clock className="h-3 w-3" />
+                              <span>{suggestion.optimal_time}</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{suggestion.reason}</p>
+                          <p className="text-xs text-muted-foreground italic">
+                            💡 {suggestion.time_reason}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Generator Card */}
         <Card className="border-2 shadow-lg">

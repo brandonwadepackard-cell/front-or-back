@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Sparkles, ArrowRight, Zap, Target, TrendingUp, Search, FolderOpen, Twitter, Linkedin, Github, Mail, Book, HelpCircle } from "lucide-react";
 import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { ParallaxHero } from "@/components/ParallaxHero";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 
 const Index = () => {
   return (
@@ -178,6 +179,9 @@ const Index = () => {
               <p className="text-muted-foreground text-sm">
                 Your unified AI system for content creation, scheduling, and analytics.
               </p>
+              <div className="pt-2">
+                <NewsletterSignup />
+              </div>
             </div>
 
             {/* Product Links */}

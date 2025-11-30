@@ -1,5 +1,9 @@
 import { NavLink } from "@/components/NavLink";
-import { Brain, Menu, Home, LayoutDashboard, FileText, Layout, Clock, BarChart, Calendar, CalendarRange, Archive, Globe, Shield, Smartphone, Link2, QrCode } from "lucide-react";
+import { Brain, Menu, Home, LayoutDashboard, FileText, Layout, Clock, BarChart, Calendar, CalendarRange, Archive, Globe, Shield, Smartphone, Link2, QrCode, LogOut, LogIn } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { useAdminCheck } from "@/hooks/use-admin-check";
 import {
   DropdownMenu,
@@ -18,6 +22,30 @@ import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 export const Navigation = () => {
   useKeyboardShortcuts();
   const { isAdmin } = useAdminCheck();
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Signed out",
+      description: "You have been signed out successfully.",
+    });
+    navigate("/");
+  };
   
   return (
     <nav className="border-b bg-card/80 backdrop-blur-lg supports-[backdrop-filter]:bg-card/60 sticky top-0 z-50 shadow-sm">
@@ -154,6 +182,21 @@ export const Navigation = () => {
                     </NavLink>
                   </DropdownMenuItem>
                 </>
+              )}
+
+              <DropdownMenuSeparator />
+              {user ? (
+                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer flex items-center gap-2">
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem asChild>
+                  <NavLink to="/auth" className="w-full cursor-pointer flex items-center gap-2">
+                    <LogIn className="h-4 w-4" />
+                    Sign In
+                  </NavLink>
+                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
